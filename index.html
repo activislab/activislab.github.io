@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="The Active Vision Laboratory investigates how eye movements, attention, expectation and neural activity shape visual perception." />
+  <meta name="theme-color" content="#f4f1ea" />
+  <title>ACTIVIS Lab — Active Vision Laboratory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header" data-header>
+    <div class="shell header-inner">
+      <a class="brand" href="#top" aria-label="ACTIVIS Lab home">
+        <span class="brand-mark" aria-hidden="true">
+          <span class="brand-dot"></span>
+          <span class="brand-line"></span>
+        </span>
+        <span class="brand-copy">
+          <strong>ACTIVIS</strong>
+          <small>Active Vision Laboratory</small>
+        </span>
+      </a>
+
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" data-menu-toggle>
+        <span class="sr-only">Toggle navigation</span>
+        <span></span><span></span>
+      </button>
+
+      <nav class="site-nav" id="site-nav" data-nav aria-label="Primary navigation">
+        <a href="#research">Research</a>
+        <a href="#people">People</a>
+        <a href="#publications">Publications</a>
+        <a href="#news">News</a>
+        <a href="#join">Join us</a>
+        <a class="nav-contact" href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="shell hero-grid">
+        <div class="hero-copy reveal">
+          <p class="eyebrow">Visual neuroscience · São Paulo, Brazil</p>
+          <h1>How does the brain maintain a coherent visual world while the eyes move?</h1>
+          <p class="hero-intro">We investigate how eye movements, attention, expectation and neural activity interact to shape perception during active vision.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#research">Explore our research</a>
+            <a class="text-link" href="#people">Meet the team <span aria-hidden="true">↗</span></a>
+          </div>
+          <dl class="hero-facts" aria-label="Laboratory facts">
+            <div><dt>Approach</dt><dd>Behaviour + neurophysiology</dd></div>
+            <div><dt>Models</dt><dd>Humans + non-human primates</dd></div>
+            <div><dt>Affiliation</dt><dd>University of São Paulo</dd></div>
+          </dl>
+        </div>
+
+        <div class="hero-visual reveal" aria-label="Abstract representation of fixations and a saccade trajectory">
+          <svg viewBox="0 0 700 670" role="img" aria-labelledby="hero-visual-title hero-visual-desc">
+            <title id="hero-visual-title">Saccade trajectory</title>
+            <desc id="hero-visual-desc">A sequence of fixation points connected by a curved eye-movement path.</desc>
+            <defs>
+              <radialGradient id="field" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#00a8c6" stop-opacity=".18" />
+                <stop offset="100%" stop-color="#00a8c6" stop-opacity="0" />
+              </radialGradient>
+              <filter id="soft-blur"><feGaussianBlur stdDeviation="20" /></filter>
+            </defs>
+            <circle cx="515" cy="180" r="150" fill="url(#field)" filter="url(#soft-blur)" />
+            <circle cx="160" cy="490" r="124" fill="url(#field)" opacity=".65" filter="url(#soft-blur)" />
+            <path class="trajectory trajectory-shadow" d="M112 500 C 188 470, 236 399, 302 358 S 433 300, 542 178" />
+            <path class="trajectory trajectory-main" d="M112 500 C 188 470, 236 399, 302 358 S 433 300, 542 178" />
+            <circle class="fixation-ring" cx="112" cy="500" r="43" />
+            <circle class="fixation-dot cyan" cx="112" cy="500" r="9" />
+            <circle class="fixation-ring small" cx="302" cy="358" r="29" />
+            <circle class="fixation-dot ink" cx="302" cy="358" r="7" />
+            <circle class="target-ring" cx="542" cy="178" r="70" />
+            <circle class="target-ring inner" cx="542" cy="178" r="34" />
+            <circle class="fixation-dot orange" cx="542" cy="178" r="10" />
+            <g class="stimulus" transform="translate(488 124)">
+              <clipPath id="stimulus-mask"><circle cx="54" cy="54" r="54" /></clipPath>
+              <g clip-path="url(#stimulus-mask)" opacity=".74">
+                <rect width="108" height="108" fill="#f4f1ea" />
+                <g transform="rotate(-18 54 54)" stroke="#123b5d" stroke-width="5">
+                  <line x1="-20" y1="8" x2="130" y2="8" />
+                  <line x1="-20" y1="22" x2="130" y2="22" />
+                  <line x1="-20" y1="36" x2="130" y2="36" />
+                  <line x1="-20" y1="50" x2="130" y2="50" />
+                  <line x1="-20" y1="64" x2="130" y2="64" />
+                  <line x1="-20" y1="78" x2="130" y2="78" />
+                  <line x1="-20" y1="92" x2="130" y2="92" />
+                  <line x1="-20" y1="106" x2="130" y2="106" />
+                </g>
+              </g>
+            </g>
+            <text x="72" y="585" class="visual-label">current fixation</text>
+            <text x="485" y="81" class="visual-label">selected target</text>
+            <text x="245" y="422" class="visual-label coral">saccade</text>
+            <path class="coordinate" d="M60 610 H640 M60 610 V70" />
+            <g class="ticks">
+              <line x1="160" y1="604" x2="160" y2="616" /><line x1="260" y1="604" x2="260" y2="616" />
+              <line x1="360" y1="604" x2="360" y2="616" /><line x1="460" y1="604" x2="460" y2="616" />
+              <line x1="560" y1="604" x2="560" y2="616" />
+            </g>
+          </svg>
+        </div>
+      </div>
+      <div class="shell hero-rule" aria-hidden="true"><span></span><i></i><span></span></div>
+    </section>
+
+    <section class="section research-section" id="research">
+      <div class="shell">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Research programme</p>
+          <h2>Vision is an active process.</h2>
+          <p>Our work asks how the visual system selects, predicts and stabilises information around each eye movement.</p>
+        </div>
+
+        <div class="research-list">
+          <article class="research-card reveal">
+            <div class="card-number">01</div>
+            <div class="card-body">
+              <p class="card-kicker">Selection</p>
+              <h3>Presaccadic attention</h3>
+              <p>How visual sensitivity and neural representations change at the future point of fixation before the eyes begin to move.</p>
+              <a href="#featured-study">View current work <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="card-graphic graphic-target" aria-hidden="true"><span></span><i></i></div>
+          </article>
+
+          <article class="research-card reveal">
+            <div class="card-number">02</div>
+            <div class="card-body">
+              <p class="card-kicker">Prediction</p>
+              <h3>Expectation and perception</h3>
+              <p>How prior knowledge about when and what we are likely to see changes perceptual sensitivity and oculomotor decisions.</p>
+              <a href="#featured-study">Read the research question <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="card-graphic graphic-probability" aria-hidden="true"><b></b><b></b><b></b><b></b></div>
+          </article>
+
+          <article class="research-card reveal">
+            <div class="card-number">03</div>
+            <div class="card-body">
+              <p class="card-kicker">Dynamics</p>
+              <h3>Neural mechanisms of active vision</h3>
+              <p>How neuronal populations across the visual and oculomotor systems coordinate perception, attention and action.</p>
+              <a href="#methods">Explore our methods <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="card-graphic graphic-neural" aria-hidden="true">
+              <svg viewBox="0 0 180 100"><path d="M0 60 C14 60 14 57 25 57 C36 57 35 19 48 19 C61 19 60 79 72 79 C84 79 83 50 96 50 C109 50 108 69 120 69 C132 69 132 43 145 43 C158 43 158 59 180 59" /></svg>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section featured-study" id="featured-study">
+      <div class="shell featured-grid">
+        <div class="study-visual reveal" aria-hidden="true">
+          <div class="study-gridlines"></div>
+          <div class="study-label top">HIGH PROBABILITY</div>
+          <div class="study-label bottom">LOW PROBABILITY</div>
+          <div class="gabor gabor-one"></div>
+          <div class="gabor gabor-two"></div>
+          <div class="study-fixation"><span></span></div>
+          <svg viewBox="0 0 600 520" preserveAspectRatio="none">
+            <path d="M78 363 C174 364 236 300 317 241 C385 191 434 174 523 154" />
+          </svg>
+          <span class="study-dot start"></span>
+          <span class="study-dot end"></span>
+        </div>
+
+        <div class="study-copy reveal">
+          <p class="eyebrow light">Featured question</p>
+          <h2>Do expectations shape perception and action in the same way?</h2>
+          <p class="study-lead">By manipulating the probability of visual features during saccade preparation, we can test whether predictive information is expressed similarly in perceptual sensitivity and eye-movement initiation.</p>
+          <div class="finding">
+            <span class="finding-label">Working principle</span>
+            <p>Perception and action may draw on distinct forms of predictive visual processing—even when they are directed toward the same object.</p>
+          </div>
+          <a class="button button-light" href="#publications">See selected publications</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section methods-section" id="methods">
+      <div class="shell">
+        <div class="section-heading compact reveal">
+          <p class="eyebrow">Methods</p>
+          <h2>From behaviour to neural populations.</h2>
+        </div>
+        <div class="methods-grid">
+          <article class="method reveal"><span>01</span><h3>Psychophysics</h3><p>Quantifying perception under controlled visual and temporal conditions.</p></article>
+          <article class="method reveal"><span>02</span><h3>Eye tracking</h3><p>Resolving the preparation, execution and consequences of saccadic eye movements.</p></article>
+          <article class="method reveal"><span>03</span><h3>EEG &amp; MEG</h3><p>Tracking fast neural dynamics across the human brain.</p></article>
+          <article class="method reveal"><span>04</span><h3>Electrophysiology</h3><p>Recording neuronal populations in non-human primates during active visual behaviour.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section people-section" id="people">
+      <div class="shell">
+        <div class="section-heading split reveal">
+          <div><p class="eyebrow">People</p><h2>A collaborative laboratory for active vision.</h2></div>
+          <p>This first prototype uses placeholders for the current team. Final cards will include consistent portraits, short research descriptions and profile links.</p>
+        </div>
+
+        <div class="people-grid">
+          <article class="person person-lead reveal">
+            <div class="portrait portrait-gustavo"><span>GR</span></div>
+            <div><p class="person-role">Principal investigator</p><h3>Gustavo Rohenkohl</h3><p>Visual neuroscience, attention, expectation and oculomotor control.</p></div>
+          </article>
+          <article class="person reveal">
+            <div class="portrait"><span>01</span></div>
+            <div><p class="person-role">Postdoctoral researcher</p><h3>Team member</h3><p>Short research description.</p></div>
+          </article>
+          <article class="person reveal">
+            <div class="portrait"><span>02</span></div>
+            <div><p class="person-role">PhD researcher</p><h3>Team member</h3><p>Short research description.</p></div>
+          </article>
+          <article class="person reveal">
+            <div class="portrait"><span>03</span></div>
+            <div><p class="person-role">MSc researcher</p><h3>Team member</h3><p>Short research description.</p></div>
+          </article>
+        </div>
+        <a class="text-link people-link reveal" href="#join">View all members and alumni <span aria-hidden="true">→</span></a>
+      </div>
+    </section>
+
+    <section class="section publications-section" id="publications">
+      <div class="shell publications-grid">
+        <div class="section-heading sticky-heading reveal">
+          <p class="eyebrow">Selected work</p>
+          <h2>Recent publications and preprints.</h2>
+          <p>The final site can import publication records from a simple data file, making this section easy to maintain.</p>
+          <a class="button button-outline" href="#contact">View all publications</a>
+        </div>
+
+        <div class="publication-list">
+          <article class="publication reveal">
+            <div class="pub-year">2026</div>
+            <div><p class="pub-type">Featured preprint</p><h3>Dissociable effects of feature expectation on saccades and presaccadic perception</h3><p>Feature probability alters perceptual sensitivity and saccade initiation through distinct patterns.</p><a href="#">Abstract <span aria-hidden="true">↗</span></a></div>
+          </article>
+          <article class="publication reveal">
+            <div class="pub-year">2025</div>
+            <div><p class="pub-type">Research article</p><h3>Publication title placeholder</h3><p>Add the citation, a one-sentence plain-language summary and links to the article, preprint, data or code.</p><a href="#">Article <span aria-hidden="true">↗</span></a></div>
+          </article>
+          <article class="publication reveal">
+            <div class="pub-year">2024</div>
+            <div><p class="pub-type">Research article</p><h3>Publication title placeholder</h3><p>Selected papers can include a thumbnail or graphical abstract when useful.</p><a href="#">Article <span aria-hidden="true">↗</span></a></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section news-section" id="news">
+      <div class="shell">
+        <div class="section-heading split reveal">
+          <div><p class="eyebrow">Lab notes</p><h2>News from the laboratory.</h2></div>
+          <a class="text-link" href="#">See all news <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="news-grid">
+          <article class="news-card reveal">
+            <div class="news-image image-paper"><span>NEW<br />PAPER</span></div>
+            <p class="news-meta">Publication · July 2026</p>
+            <h3>A short, accessible headline for the latest study</h3>
+            <a href="#">Read more <span aria-hidden="true">→</span></a>
+          </article>
+          <article class="news-card reveal">
+            <div class="news-image image-conference"><span>VSS</span></div>
+            <p class="news-meta">Conference · May 2026</p>
+            <h3>ACTIVIS Lab presents new work at an international meeting</h3>
+            <a href="#">Read more <span aria-hidden="true">→</span></a>
+          </article>
+          <article class="news-card reveal">
+            <div class="news-image image-team"><span>LAB<br />NOTE</span></div>
+            <p class="news-meta">People · March 2026</p>
+            <h3>Welcoming a new researcher to the active vision team</h3>
+            <a href="#">Read more <span aria-hidden="true">→</span></a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section join-section" id="join">
+      <div class="shell join-grid reveal">
+        <div>
+          <p class="eyebrow light">Join the laboratory</p>
+          <h2>Interested in how the brain sees and acts?</h2>
+        </div>
+        <div>
+          <p>We welcome enquiries from prospective undergraduate researchers, graduate students, postdoctoral fellows and collaborators whose interests connect with active vision.</p>
+          <a class="button button-light" href="mailto:contact@example.com">Current opportunities</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="contact">
+    <div class="shell footer-grid">
+      <div>
+        <a class="brand footer-brand" href="#top">
+          <span class="brand-mark" aria-hidden="true"><span class="brand-dot"></span><span class="brand-line"></span></span>
+          <span class="brand-copy"><strong>ACTIVIS</strong><small>Active Vision Laboratory</small></span>
+        </a>
+        <p>Department of Physiology<br />Institute of Biosciences<br />University of São Paulo</p>
+      </div>
+      <div>
+        <p class="footer-label">Contact</p>
+        <a href="mailto:contact@example.com">contact@example.com</a>
+        <p>São Paulo, SP · Brazil</p>
+      </div>
+      <div>
+        <p class="footer-label">Links</p>
+        <a href="#research">Research</a>
+        <a href="#people">People</a>
+        <a href="#publications">Publications</a>
+        <a href="#join">Join us</a>
+      </div>
+      <div>
+        <p class="footer-label">Profiles</p>
+        <a href="https://github.com/activislab">GitHub</a>
+        <a href="#">Google Scholar</a>
+        <a href="#">ORCID</a>
+      </div>
+    </div>
+    <div class="shell footer-bottom">
+      <span>© <span data-year></span> ACTIVIS Lab</span>
+      <span>Editorial prototype · content to be reviewed</span>
+    </div>
+  </footer>
+</body>
+</html>
