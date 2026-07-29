@@ -251,7 +251,7 @@ h1 { max-width: 760px; font-family: var(--display); font-size: clamp(3.5rem, 6.5
 @media (max-width: 680px) {
   :root { --shell: min(100% - 28px, 560px); }
   .header-inner { min-height: 76px; }.site-nav { top: 76px; }
-  .brand-logo { width: auto; height: 19px; flex-basis: auto; }
+  .brand-logo { width: auto; height: 24px; flex-basis: auto; }
   .brand-copy small { display: none; }
   .hero { padding-top: 120px; }
   h1 { font-size: clamp(3.1rem, 15vw, 4.7rem); }
