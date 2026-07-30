@@ -465,3 +465,5 @@ h1 { max-width: 760px; font-family: var(--display); font-size: clamp(3.5rem, 6.5
   .collaborator-card { grid-template-columns: 48px 1fr; padding: 22px; }
   .collaborator-initials { width: 48px; height: 48px; }
 }
+
+.portrait-bruna img { object-position: center 18%; }
