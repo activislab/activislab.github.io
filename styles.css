@@ -514,3 +514,26 @@ h1 { max-width: 760px; font-family: var(--display); font-size: clamp(3.5rem, 6.5
     grid-template-columns: 1fr;
   }
 }
+
+
+/* profile links */
+.person-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 14px;
+}
+
+.person-links a {
+  color: var(--navy);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  border-bottom: 1px solid rgba(18, 59, 93, .25);
+}
+
+.person-links a:hover,
+.person-links a:focus-visible {
+  color: var(--cyan-deep);
+  border-bottom-color: currentColor;
+}
