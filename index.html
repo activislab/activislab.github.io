@@ -51,7 +51,7 @@
 <div aria-label="abstract representation of fixations and a saccade trajectory" class="hero-visual reveal">
 <svg class="foraging-hero" aria-labelledby="hero-visual-title hero-visual-desc" role="img" viewBox="0 0 700 670">
 <title id="hero-visual-title">eye movements during visual foraging</title>
-<desc id="hero-visual-desc">eight gratings in a vertically oriented poisson-like arrangement, with two previous saccades and one upcoming animated saccade.</desc>
+<desc id="hero-visual-desc">eight gratings in a vertically oriented poisson-like arrangement, with two previous saccades, small microsaccades at each visited fixation, and one upcoming animated saccade.</desc>
 <style>
   .foraging-hero { width: 100%; height: auto; overflow: visible; }
   .foraging-hero .foraging-label {
@@ -79,7 +79,18 @@
     stroke: #00a8c6;
     stroke-width: 1.4;
   }
-  .foraging-hero .foraging-fixation-dot { fill: #123b5d; }
+  .foraging-hero .foraging-microsaccade {
+    fill: none;
+    stroke: #123b5d;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: .88;
+  }
+  .foraging-hero .foraging-microsaccade.secondary {
+    stroke-width: 1.35;
+    opacity: .72;
+  }
   .foraging-hero .foraging-target-dot { fill: #f28c78; }
   .foraging-hero .foraging-saccade-previous {
     fill: none;
@@ -149,52 +160,42 @@
   </radialGradient>
 </defs>
 
-<!-- subtle fields around current fixation and selected target -->
-<circle cx="450" cy="354" r="90" fill="url(#foraging-field)"></circle>
+<!-- subtle field around selected target -->
 <circle cx="547" cy="150" r="118" fill="url(#foraging-field)"></circle>
 
-<!-- two previous saccades -->
-<line class="foraging-saccade-previous" x1="226" y1="559" x2="396" y2="637"></line>
-<line class="foraging-saccade-previous" x1="396" y1="637" x2="450" y2="354"></line>
-
-<!-- final animated saccade -->
-<path class="foraging-saccade-current-shadow" d="M450 354 C476 296, 512 218, 547 150"></path>
-<path class="foraging-saccade-current" d="M450 354 C476 296, 512 218, 547 150"></path>
-
-<!-- unvisited gratings -->
+<!-- gratings -->
 <circle class="foraging-grating" cx="330" cy="86" r="28" style="fill:url(#foraging-grating-1)"></circle>
 <circle class="foraging-grating" cx="264" cy="341" r="28" style="fill:url(#foraging-grating-3)"></circle>
 <circle class="foraging-grating" cx="636" cy="354" r="28" style="fill:url(#foraging-grating-5)"></circle>
 <circle class="foraging-grating" cx="567" cy="544" r="28" style="fill:url(#foraging-grating-7)"></circle>
+<circle class="foraging-grating-visited" cx="226" cy="559" r="28" style="fill:url(#foraging-grating-8)"></circle>
+<circle class="foraging-grating-visited" cx="396" cy="637" r="28" style="fill:url(#foraging-grating-9)"></circle>
+<circle class="foraging-grating-visited" cx="450" cy="354" r="28" style="fill:url(#foraging-grating-4)"></circle>
+<circle class="foraging-grating-target" cx="547" cy="150" r="28" style="fill:url(#foraging-grating-target-pattern)"></circle>
 
-<!-- previous fixation 1: bottom-left -->
-<g>
-  <circle class="foraging-grating-visited" cx="226" cy="559" r="28" style="fill:url(#foraging-grating-8)"></circle>
-  <circle class="foraging-fixation-dot" cx="226" cy="559" r="5.5"></circle>
-</g>
+<!-- saccades on top of gratings -->
+<line class="foraging-saccade-previous" x1="226" y1="559" x2="396" y2="637"></line>
+<line class="foraging-saccade-previous" x1="396" y1="637" x2="450" y2="354"></line>
+<path class="foraging-saccade-current-shadow" d="M450 354 C476 296, 512 218, 547 150"></path>
+<path class="foraging-saccade-current" d="M450 354 C476 296, 512 218, 547 150"></path>
 
-<!-- previous fixation 2: bottom-right -->
-<g>
-  <circle class="foraging-grating-visited" cx="396" cy="637" r="28" style="fill:url(#foraging-grating-9)"></circle>
-  <circle class="foraging-fixation-dot" cx="396" cy="637" r="5.5"></circle>
-</g>
+<!-- microsaccades and target marker -->
+<path class="foraging-microsaccade" d="M216 564 L223 558 L230 561"></path>
+<path class="foraging-microsaccade secondary" d="M220 553 L225 556 L231 551"></path>
+<path class="foraging-microsaccade secondary" d="M228 566 L233 562 L237 565"></path>
 
-<!-- current fixation -->
-<g>
-  <circle class="foraging-fixation-ring" cx="450" cy="354" r="40"></circle>
-  <circle class="foraging-grating-visited" cx="450" cy="354" r="28" style="fill:url(#foraging-grating-4)"></circle>
-  <circle class="foraging-fixation-dot" cx="450" cy="354" r="6.5"></circle>
-</g>
+<path class="foraging-microsaccade" d="M388 641 L395 635 L402 639"></path>
+<path class="foraging-microsaccade secondary" d="M392 629 L398 633 L404 628"></path>
+<path class="foraging-microsaccade secondary" d="M399 644 L404 640 L409 642"></path>
 
-<!-- selected target -->
-<g>
-  <circle cx="547" cy="150" r="44" fill="rgba(0,168,198,.04)" stroke="#00a8c6" stroke-width="1.5"></circle>
-  <circle class="foraging-grating-target" cx="547" cy="150" r="28" style="fill:url(#foraging-grating-target-pattern)"></circle>
-  <circle class="foraging-target-dot" cx="547" cy="150" r="6.5"></circle>
-</g>
+<path class="foraging-microsaccade" d="M441 358 L448 351 L456 355"></path>
+<path class="foraging-microsaccade secondary" d="M444 346 L450 350 L456 345"></path>
+<path class="foraging-microsaccade secondary" d="M451 361 L456 357 L461 360"></path>
+
+<circle cx="547" cy="150" r="44" fill="rgba(0,168,198,.04)" stroke="#00a8c6" stroke-width="1.5"></circle>
+<circle class="foraging-target-dot" cx="547" cy="150" r="6.5"></circle>
 
 <!-- labels -->
-<text class="foraging-label" x="415" y="414">current fixation</text>
 <text class="foraging-label" x="506" y="76">selected target</text>
 <text class="foraging-label foraging-label-accent" x="522" y="248">saccade</text>
 </svg>
