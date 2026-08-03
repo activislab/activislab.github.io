@@ -51,7 +51,7 @@
 <div aria-label="abstract representation of fixations and a saccade trajectory" class="hero-visual reveal">
 <svg class="foraging-hero" aria-labelledby="hero-visual-title hero-visual-desc" role="img" viewBox="0 0 700 670">
 <title id="hero-visual-title">eye movements during visual foraging</title>
-<desc id="hero-visual-desc">eight gratings in a vertically oriented poisson-like arrangement, with two previous saccades, small microsaccades at each visited fixation, and one upcoming animated saccade.</desc>
+<desc id="hero-visual-desc">eight gratings in a vertically oriented poisson-like arrangement, with two previous saccades and one upcoming animated saccade.</desc>
 <style>
   .foraging-hero { width: 100%; height: auto; overflow: visible; }
   .foraging-hero .foraging-label {
@@ -78,18 +78,6 @@
     fill: rgba(0, 168, 198, .05);
     stroke: #00a8c6;
     stroke-width: 1.4;
-  }
-  .foraging-hero .foraging-microsaccade {
-    fill: none;
-    stroke: #123b5d;
-    stroke-width: 1.7;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    opacity: .88;
-  }
-  .foraging-hero .foraging-microsaccade.secondary {
-    stroke-width: 1.35;
-    opacity: .72;
   }
   .foraging-hero .foraging-target-dot { fill: #f28c78; }
   .foraging-hero .foraging-saccade-previous {
@@ -180,17 +168,8 @@
 <path class="foraging-saccade-current" d="M450 354 C476 296, 512 218, 547 150"></path>
 
 <!-- microsaccades and target marker -->
-<path class="foraging-microsaccade" d="M216 564 L223 558 L230 561"></path>
-<path class="foraging-microsaccade secondary" d="M220 553 L225 556 L231 551"></path>
-<path class="foraging-microsaccade secondary" d="M228 566 L233 562 L237 565"></path>
 
-<path class="foraging-microsaccade" d="M388 641 L395 635 L402 639"></path>
-<path class="foraging-microsaccade secondary" d="M392 629 L398 633 L404 628"></path>
-<path class="foraging-microsaccade secondary" d="M399 644 L404 640 L409 642"></path>
 
-<path class="foraging-microsaccade" d="M441 358 L448 351 L456 355"></path>
-<path class="foraging-microsaccade secondary" d="M444 346 L450 350 L456 345"></path>
-<path class="foraging-microsaccade secondary" d="M451 361 L456 357 L461 360"></path>
 
 <circle cx="547" cy="150" r="44" fill="rgba(0,168,198,.04)" stroke="#00a8c6" stroke-width="1.5"></circle>
 <circle class="foraging-target-dot" cx="547" cy="150" r="6.5"></circle>
