@@ -89,6 +89,12 @@
     stroke-dasharray: 7 8;
     stroke-opacity: .28;
   }
+  .foraging-hero .foraging-saccade-current-shadow {
+    fill: none;
+    stroke: rgba(111, 122, 132, .22);
+    stroke-width: 5.4;
+    stroke-linecap: round;
+  }
   .foraging-hero .foraging-saccade-current {
     fill: none;
     stroke: #f06449;
@@ -149,6 +155,7 @@
 <line class="foraging-saccade-previous" x1="396" y1="637" x2="450" y2="354"></line>
 
 <!-- final animated saccade -->
+<path class="foraging-saccade-current-shadow" d="M450 354 C476 296, 512 218, 547 150"></path>
 <path class="foraging-saccade-current" d="M450 354 C476 296, 512 218, 547 150"></path>
 
 <!-- unvisited gratings -->
@@ -178,15 +185,15 @@
 
 <!-- selected target -->
 <g>
-  <circle cx="547" cy="150" r="58" fill="rgba(0,168,198,.05)" stroke="#00a8c6" stroke-width="1.6"></circle>
-  <circle class="foraging-grating-target" cx="547" cy="150" r="41" style="fill:url(#foraging-grating-target-pattern)"></circle>
+  <circle cx="547" cy="150" r="44" fill="rgba(0,168,198,.04)" stroke="#00a8c6" stroke-width="1.5"></circle>
+  <circle class="foraging-grating-target" cx="547" cy="150" r="28" style="fill:url(#foraging-grating-target-pattern)"></circle>
   <circle class="foraging-target-dot" cx="547" cy="150" r="6.5"></circle>
 </g>
 
 <!-- labels -->
 <text class="foraging-label" x="415" y="414">current fixation</text>
 <text class="foraging-label" x="506" y="76">selected target</text>
-<text class="foraging-label foraging-label-accent" x="490" y="274">saccade</text>
+<text class="foraging-label foraging-label-accent" x="522" y="248">saccade</text>
 </svg>
 </div>
 </div>
