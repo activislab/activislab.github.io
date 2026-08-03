@@ -51,7 +51,7 @@
 <div aria-label="abstract representation of fixations and a saccade trajectory" class="hero-visual reveal">
 <svg class="foraging-hero" aria-labelledby="hero-visual-title hero-visual-desc" role="img" viewBox="0 0 700 670">
 <title id="hero-visual-title">eye movements during visual foraging</title>
-<desc id="hero-visual-desc">ten gratings in a poisson-like arrangement, with five previous saccades and one upcoming animated saccade.</desc>
+<desc id="hero-visual-desc">ten gratings in a poisson-like arrangement, with three previous saccades and one upcoming animated saccade.</desc>
 <style>
   .foraging-hero { width: 100%; height: auto; overflow: visible; }
   .foraging-hero .foraging-label {
@@ -63,17 +63,14 @@
   }
   .foraging-hero .foraging-label-accent { fill: #f06449; }
   .foraging-hero .foraging-grating {
-    fill: url(#foraging-grating-grey);
     stroke: #9ca4ab;
     stroke-width: 1.5;
   }
   .foraging-hero .foraging-grating-visited {
-    fill: url(#foraging-grating-grey);
     stroke: #55bfd2;
     stroke-width: 1.7;
   }
   .foraging-hero .foraging-grating-target {
-    fill: url(#foraging-grating-dark);
     stroke: #00a8c6;
     stroke-width: 2.2;
   }
@@ -105,11 +102,43 @@
   }
 </style>
 <defs>
-  <pattern id="foraging-grating-grey" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(-20)">
+  <pattern id="foraging-grating-1" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(-16)">
     <rect width="10" height="10" fill="#f4f1ea"></rect>
     <rect x="0" y="0" width="3.5" height="10" fill="#8f979f"></rect>
   </pattern>
-  <pattern id="foraging-grating-dark" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(-20)">
+  <pattern id="foraging-grating-2" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(21)">
+    <rect width="10" height="10" fill="#f4f1ea"></rect>
+    <rect x="0" y="0" width="3.5" height="10" fill="#8f979f"></rect>
+  </pattern>
+  <pattern id="foraging-grating-3" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(62)">
+    <rect width="10" height="10" fill="#f4f1ea"></rect>
+    <rect x="0" y="0" width="3.5" height="10" fill="#8f979f"></rect>
+  </pattern>
+  <pattern id="foraging-grating-4" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(-33)">
+    <rect width="10" height="10" fill="#f4f1ea"></rect>
+    <rect x="0" y="0" width="3.5" height="10" fill="#8f979f"></rect>
+  </pattern>
+  <pattern id="foraging-grating-5" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(8)">
+    <rect width="10" height="10" fill="#f4f1ea"></rect>
+    <rect x="0" y="0" width="3.5" height="10" fill="#8f979f"></rect>
+  </pattern>
+  <pattern id="foraging-grating-6" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(-57)">
+    <rect width="10" height="10" fill="#f4f1ea"></rect>
+    <rect x="0" y="0" width="3.5" height="10" fill="#8f979f"></rect>
+  </pattern>
+  <pattern id="foraging-grating-7" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(34)">
+    <rect width="10" height="10" fill="#f4f1ea"></rect>
+    <rect x="0" y="0" width="3.5" height="10" fill="#8f979f"></rect>
+  </pattern>
+  <pattern id="foraging-grating-8" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(75)">
+    <rect width="10" height="10" fill="#f4f1ea"></rect>
+    <rect x="0" y="0" width="3.5" height="10" fill="#8f979f"></rect>
+  </pattern>
+  <pattern id="foraging-grating-9" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(-72)">
+    <rect width="10" height="10" fill="#f4f1ea"></rect>
+    <rect x="0" y="0" width="3.5" height="10" fill="#8f979f"></rect>
+  </pattern>
+  <pattern id="foraging-grating-target-pattern" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(48)">
     <rect width="10" height="10" fill="#f4f1ea"></rect>
     <rect x="0" y="0" width="3.8" height="10" fill="#123b5d"></rect>
   </pattern>
@@ -123,67 +152,50 @@
 <circle cx="450" cy="354" r="90" fill="url(#foraging-field)"></circle>
 <circle cx="547" cy="150" r="118" fill="url(#foraging-field)"></circle>
 
-<!-- five previous saccades: faint, static, and nearly straight -->
-<path class="foraging-saccade-previous" d="M330 86 C275 100, 215 126, 154 154"></path>
-<path class="foraging-saccade-previous" d="M154 154 C126 215, 106 289, 91 363"></path>
-<path class="foraging-saccade-previous" d="M91 363 C130 430, 176 505, 226 559"></path>
-<path class="foraging-saccade-previous" d="M226 559 C279 590, 337 620, 396 637"></path>
-<path class="foraging-saccade-previous" d="M396 637 C421 548, 440 449, 450 354"></path>
+<!-- three previous saccades: faint, static, and nearly straight -->
+<line class="foraging-saccade-previous" x1="154" y1="154" x2="91" y2="363"></line>
+<line class="foraging-saccade-previous" x1="91" y1="363" x2="226" y2="559"></line>
+<line class="foraging-saccade-previous" x1="226" y1="559" x2="450" y2="354"></line>
 
 <!-- final animated saccade -->
 <path class="foraging-saccade-current" d="M450 354 C476 296, 512 218, 547 150"></path>
 
-<!-- three unvisited gratings -->
-<circle class="foraging-grating" cx="264" cy="341" r="28"></circle>
-<circle class="foraging-grating" cx="636" cy="354" r="28"></circle>
-<circle class="foraging-grating" cx="567" cy="544" r="28"></circle>
+<!-- unvisited gratings -->
+<circle class="foraging-grating" cx="330" cy="86" r="28" style="fill:url(#foraging-grating-1)"></circle>
+<circle class="foraging-grating" cx="264" cy="341" r="28" style="fill:url(#foraging-grating-3)"></circle>
+<circle class="foraging-grating" cx="636" cy="354" r="28" style="fill:url(#foraging-grating-5)"></circle>
+<circle class="foraging-grating" cx="567" cy="544" r="28" style="fill:url(#foraging-grating-7)"></circle>
+<circle class="foraging-grating" cx="396" cy="637" r="28" style="fill:url(#foraging-grating-9)"></circle>
 
 <!-- previous fixation 1 -->
 <g>
-  <circle class="foraging-fixation-ring" cx="330" cy="86" r="36"></circle>
-  <circle class="foraging-grating-visited" cx="330" cy="86" r="28"></circle>
-  <circle class="foraging-fixation-dot" cx="330" cy="86" r="5.5"></circle>
+  <circle class="foraging-grating-visited" cx="154" cy="154" r="28" style="fill:url(#foraging-grating-2)"></circle>
+  <circle class="foraging-fixation-dot" cx="154" cy="154" r="5.5"></circle>
 </g>
 
 <!-- previous fixation 2 -->
 <g>
-  <circle class="foraging-fixation-ring" cx="154" cy="154" r="36"></circle>
-  <circle class="foraging-grating-visited" cx="154" cy="154" r="28"></circle>
-  <circle class="foraging-fixation-dot" cx="154" cy="154" r="5.5"></circle>
+  <circle class="foraging-grating-visited" cx="91" cy="363" r="28" style="fill:url(#foraging-grating-6)"></circle>
+  <circle class="foraging-fixation-dot" cx="91" cy="363" r="5.5"></circle>
 </g>
 
 <!-- previous fixation 3 -->
 <g>
-  <circle class="foraging-fixation-ring" cx="91" cy="363" r="36"></circle>
-  <circle class="foraging-grating-visited" cx="91" cy="363" r="28"></circle>
-  <circle class="foraging-fixation-dot" cx="91" cy="363" r="5.5"></circle>
-</g>
-
-<!-- previous fixation 4 -->
-<g>
-  <circle class="foraging-fixation-ring" cx="226" cy="559" r="36"></circle>
-  <circle class="foraging-grating-visited" cx="226" cy="559" r="28"></circle>
+  <circle class="foraging-grating-visited" cx="226" cy="559" r="28" style="fill:url(#foraging-grating-8)"></circle>
   <circle class="foraging-fixation-dot" cx="226" cy="559" r="5.5"></circle>
-</g>
-
-<!-- previous fixation 5 -->
-<g>
-  <circle class="foraging-fixation-ring" cx="396" cy="637" r="36"></circle>
-  <circle class="foraging-grating-visited" cx="396" cy="637" r="28"></circle>
-  <circle class="foraging-fixation-dot" cx="396" cy="637" r="5.5"></circle>
 </g>
 
 <!-- current fixation -->
 <g>
   <circle class="foraging-fixation-ring" cx="450" cy="354" r="40"></circle>
-  <circle class="foraging-grating-visited" cx="450" cy="354" r="31"></circle>
+  <circle class="foraging-grating-visited" cx="450" cy="354" r="31" style="fill:url(#foraging-grating-4)"></circle>
   <circle class="foraging-fixation-dot" cx="450" cy="354" r="6.5"></circle>
 </g>
 
 <!-- selected target -->
 <g>
   <circle cx="547" cy="150" r="58" fill="rgba(0,168,198,.05)" stroke="#00a8c6" stroke-width="1.6"></circle>
-  <circle class="foraging-grating-target" cx="547" cy="150" r="41"></circle>
+  <circle class="foraging-grating-target" cx="547" cy="150" r="41" style="fill:url(#foraging-grating-target-pattern)"></circle>
   <circle class="foraging-target-dot" cx="547" cy="150" r="6.5"></circle>
 </g>
 
