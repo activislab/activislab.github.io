@@ -146,6 +146,36 @@
     <stop offset="0%" stop-color="#00a8c6" stop-opacity=".14"></stop>
     <stop offset="100%" stop-color="#00a8c6" stop-opacity="0"></stop>
   </radialGradient>
+  <linearGradient
+  id="foraging-saccade-fade"
+  gradientUnits="userSpaceOnUse"
+  x1="450"
+  y1="354"
+  x2="547"
+  y2="150"
+>
+  <stop offset="0%" stop-color="white" stop-opacity="1"></stop>
+  <stop offset="55%" stop-color="white" stop-opacity="1"></stop>
+  <stop offset="92%" stop-color="white" stop-opacity="0"></stop>
+  <stop offset="100%" stop-color="white" stop-opacity="0"></stop>
+</linearGradient>
+
+<mask
+  id="foraging-saccade-fade-mask"
+  maskUnits="userSpaceOnUse"
+  x="420"
+  y="110"
+  width="180"
+  height="290"
+>
+  <rect
+    x="420"
+    y="110"
+    width="180"
+    height="290"
+    fill="url(#foraging-saccade-fade)"
+  ></rect>
+</mask>
 </defs>
 
 <!-- subtle field around selected target -->
@@ -164,8 +194,16 @@
 <!-- saccades on top of gratings -->
 <line class="foraging-saccade-previous" x1="226" y1="559" x2="396" y2="637"></line>
 <line class="foraging-saccade-previous" x1="396" y1="637" x2="450" y2="354"></line>
-<path class="foraging-saccade-current-shadow" d="M450 354 C476 296, 512 218, 547 150"></path>
-<path class="foraging-saccade-current" d="M450 354 C476 296, 512 218, 547 150"></path>
+<path class="foraging-saccade-current-shadow"
+  mask="url(#foraging-saccade-fade-mask)"
+  d="M450 354 C476 296, 512 218, 547 150"
+></path>
+
+<path
+  class="foraging-saccade-current"
+  mask="url(#foraging-saccade-fade-mask)"
+  d="M450 354 C476 296, 512 218, 547 150"
+></path>
 
 <!-- microsaccades and target marker -->
 
