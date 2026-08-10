@@ -51,13 +51,13 @@ input, textarea, select, code, pre { text-transform: none; }
 .site-header.is-scrolled { border-color: rgba(18, 24, 32, .1); box-shadow: 0 8px 30px rgba(18,24,32,.04); }
 .header-inner { min-height: 88px; display: flex; align-items: center; justify-content: space-between; gap: 36px; }
 .brand { display: inline-flex; align-items: center; gap: 12px; }
-.brand-logo { width: auto; height: 30px; flex: 0 0 auto; object-fit: contain; }
+.brand-logo { width: auto; height: 32px; flex: 0 0 auto; object-fit: contain; }
 .brand-mark { position: relative; width: 35px; height: 32px; flex: 0 0 35px; }
 .brand-dot { position: absolute; width: 12px; height: 12px; border-radius: 50%; background: var(--coral); left: 2px; bottom: 4px; }
 .brand-line { position: absolute; width: 29px; height: 2px; border-radius: 99px; background: var(--cyan); transform: rotate(-28deg); left: 7px; top: 13px; transform-origin: left center; }
 .brand-line::after { content: ""; position: absolute; width: 8px; height: 8px; border: 2px solid var(--navy); border-radius: 50%; right: -4px; top: -5px; background: var(--paper); }
 .brand-copy { display: grid; line-height: 1.05; }
-.brand-copy strong { font-size: 1.05rem; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; }
+.brand-copy strong { font-size: 1.07rem; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; }
 .lab-name { text-transform: uppercase; }
 .brand-copy small { margin-top: 3px; color: var(--muted); font-size: .68rem; letter-spacing: .015em; }
 .site-nav {
