@@ -66,6 +66,37 @@ input, textarea, select, code, pre { text-transform: none; }
 .site-nav a:hover::after, .site-nav a:focus-visible::after { right: 0; }
 .nav-contact { border: 1px solid var(--ink); border-radius: 999px; padding: 10px 17px !important; transition: .2s ease; }
 .nav-contact:hover { background: var(--ink); color: var(--paper); }
+.nav-github {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 0 !important;
+  border-radius: 50%;
+  color: var(--ink);
+  transition:
+    color .2s ease,
+    background .2s ease,
+    transform .2s ease;
+}
+
+.nav-github svg {
+  width: 21px;
+  height: 21px;
+}
+
+.nav-github:hover,
+.nav-github:focus-visible {
+  color: var(--cyan-deep);
+  background: rgba(0, 168, 198, .08);
+  transform: translateY(-1px);
+}
+
+/* don't draw the normal nav underline under the github icon */
+.site-nav .nav-github::after {
+  display: none;
+}
 .menu-toggle { display: none; border: 0; background: transparent; padding: 8px; }
 .menu-toggle span:not(.sr-only) { display: block; width: 26px; height: 2px; margin: 6px; background: var(--ink); transition: .2s ease; }
 
