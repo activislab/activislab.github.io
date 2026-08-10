@@ -73,7 +73,7 @@ input, textarea, select, code, pre { text-transform: none; }
   padding-block: 11px;
 }
 
-.site-nav > a:not(.nav-contact):not(.nav-github)::after {
+.site-nav > a:not(.nav-github)::after {
   content: "";
   position: absolute;
   left: 0;
@@ -89,24 +89,6 @@ input, textarea, select, code, pre { text-transform: none; }
   right: 0;
 }
 
-.nav-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.nav-contact {
-  border: 1px solid var(--ink);
-  border-radius: 999px;
-  padding: 10px 17px !important;
-  transition: background .2s ease, color .2s ease;
-}
-
-.nav-contact:hover,
-.nav-contact:focus-visible {
-  background: var(--ink);
-  color: var(--paper);
-}
 
 .nav-github {
   display: inline-flex;
@@ -119,6 +101,7 @@ input, textarea, select, code, pre { text-transform: none; }
   border-radius: 50%;
   color: var(--ink);
   line-height: 1;
+  margin-left: -10px;
   transition: color .2s ease, background .2s ease, transform .2s ease;
 }
 
@@ -274,7 +257,7 @@ h1 { max-width: 760px; font-family: var(--display); font-size: clamp(3.5rem, 6.5
   :root { --shell: min(100% - 36px, 860px); }
   .site-nav { position: fixed; inset: 88px 0 auto; display: none; background: var(--paper); border-bottom: 1px solid var(--line); padding: 25px 18px 35px; flex-direction: column; align-items: flex-start; gap: 5px; }
   .site-nav.is-open { display: flex; }
-  .nav-actions { margin-top: 8px; }
+  .nav-github { margin-left: 0; }
   .menu-toggle { display: block; }
   .hero { min-height: auto; padding-top: 145px; }
   .hero-grid, .publications-grid, .join-grid { grid-template-columns: 1fr; }
