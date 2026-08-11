@@ -179,8 +179,8 @@ h1 { max-width: 760px; font-family: var(--display); font-size: clamp(3.5rem, 6.5
 }
 .card-graphic img {
   display: block;
-  width: 70%;
-  height: 70%;
+  width: 80%;
+  height: 80%;
   object-fit: contain;
 }
 
