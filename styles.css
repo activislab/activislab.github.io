@@ -195,7 +195,7 @@ h1 { max-width: 760px; font-family: var(--display); font-size: clamp(3.5rem, 6.5
 
 /* people */
 .people-section { background: var(--paper-2); }
-.people-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; }
+.people-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 66px; }
 .person { display: grid; gap: 20px; }
 .person-lead { grid-column: span 2; grid-template-columns: 1.2fr .8fr; align-items: end; }
 .portrait { min-height: 300px; display: grid; place-items: center; background: linear-gradient(135deg, rgba(18,59,93,.95), rgba(0,168,198,.62)); border-radius: 2px; overflow: hidden; position: relative; }
