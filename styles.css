@@ -484,7 +484,7 @@ h1 { max-width: 760px; font-family: var(--display); font-size: clamp(3.5rem, 6.5
   width: 80%;
   margin-inline: auto;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 36px;
+  gap: 66px;
 }
 
 .person,
