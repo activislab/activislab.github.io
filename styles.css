@@ -4,11 +4,10 @@
   --ink: #121820;
   --navy: #123b5d;
   --cyan: #00a8c6;
-  --cyan-deep: #006f84;
+  --cyan-deep: #007d95;
   --coral: #f06449;
-  --coral-deep: #b94430;
   --line: #cfd4d5;
-  --muted: #657076;
+  --muted: #667077;
   --white: #fffdf8;
   --display: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
   --sans: "Manrope", "Helvetica Neue", Arial, sans-serif;
@@ -34,7 +33,7 @@ img, svg { display: block; max-width: 100%; }
 a { color: inherit; text-decoration: none; }
 button { color: inherit; font: inherit; }
 input, textarea, select, code, pre { text-transform: none; }
-:focus-visible { outline: 3px solid var(--coral-deep); outline-offset: 4px; }
+:focus-visible { outline: 3px solid var(--coral); outline-offset: 4px; }
 .shell { width: var(--shell); margin-inline: auto; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 .skip-link { position: fixed; z-index: 1000; left: 16px; top: -100px; background: var(--ink); color: white; padding: 10px 16px; border-radius: 8px; }
@@ -149,47 +148,6 @@ h1 { max-width: 760px; font-family: var(--display); font-size: clamp(3.5rem, 6.5
 .hero-facts dd { margin: 0; font-family: var(--display); font-size: .96rem; line-height: 1.3; }
 .hero-visual { min-width: 0; position: relative; }
 .hero-visual svg { width: 100%; overflow: visible; }
-.foraging-hero { width: 100%; height: auto; overflow: visible; }
-.foraging-hero .foraging-label {
-  font-family: Manrope, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: .09em;
-  fill: #6f7a84;
-}
-.foraging-hero .foraging-label-accent { fill: var(--coral); }
-.foraging-hero .foraging-grating { stroke: #9ca4ab; stroke-width: 1.5; }
-.foraging-hero .foraging-grating-visited { stroke: #55bfd2; stroke-width: 1.7; }
-.foraging-hero .foraging-grating-target { stroke: var(--cyan); stroke-width: 2.2; }
-.foraging-hero .foraging-target-dot { fill: var(--coral); }
-.foraging-hero .foraging-saccade-previous {
-  fill: none;
-  stroke: var(--coral);
-  stroke-width: 2.6;
-  stroke-linecap: round;
-  stroke-dasharray: 7 8;
-  stroke-opacity: .28;
-  animation: foraging-dash 1.15s linear infinite;
-}
-.foraging-hero .foraging-saccade-current-shadow {
-  fill: none;
-  stroke: var(--coral);
-  stroke-width: 14;
-  stroke-linecap: round;
-  opacity: .08;
-  filter: blur(8px);
-}
-.foraging-hero .foraging-saccade-current {
-  fill: none;
-  stroke: var(--coral);
-  stroke-width: 3.6;
-  stroke-linecap: round;
-  stroke-dasharray: 10 9;
-  animation: foraging-dash 1.15s linear infinite;
-}
-@keyframes foraging-dash {
-  to { stroke-dashoffset: -38; }
-}
 
 /* shared sections */
 .section { padding: clamp(88px, 10vw, 150px) 0; }
@@ -254,7 +212,7 @@ h1 { max-width: 760px; font-family: var(--display); font-size: clamp(3.5rem, 6.5
 .sticky-heading { position: sticky; top: 130px; }
 .publication-list { border-top: 1px solid var(--line); }
 .publication { display: grid; grid-template-columns: 82px 1fr; gap: 28px; padding: 34px 0 42px; border-bottom: 1px solid var(--line); }
-.pub-year { color: var(--coral-deep); font-size: .72rem; letter-spacing: .06em; }
+.pub-year { color: var(--coral); font-size: .72rem; letter-spacing: .06em; }
 .pub-type { margin-bottom: 8px; color: var(--cyan-deep); font-size: .66rem; font-weight: 700; letter-spacing: .11em; text-transform: lowercase; }
 .publication h3 { margin-bottom: 13px; font-family: var(--display); font-size: clamp(1.55rem, 2.3vw, 2.25rem); font-weight: 500; line-height: 1.15; }
 .publication p:not(.pub-type) { color: var(--muted); }
@@ -266,7 +224,7 @@ h1 { max-width: 760px; font-family: var(--display); font-size: clamp(3.5rem, 6.5
 .join-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 90px; padding-top: clamp(75px, 9vw, 130px); padding-bottom: clamp(75px, 9vw, 130px); align-items: center; }
 .join-grid h2 { font-family: var(--display); font-size: clamp(3.4rem, 6vw, 6.2rem); line-height: .95; font-weight: 500; letter-spacing: -.05em; }
 .join-grid > div:last-child p { font-family: var(--display); font-size: 1.3rem; }
-.join-grid .eyebrow.light { color: rgba(18,24,32,.85); }
+.join-grid .eyebrow.light { color: rgba(18,24,32,.65); }
 .join-grid .button { margin-top: 22px; }
 
 /* footer */
