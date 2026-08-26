@@ -74,63 +74,6 @@
 <svg class="foraging-hero" aria-labelledby="hero-visual-title hero-visual-desc" role="img" viewBox="0 0 700 670">
 <title id="hero-visual-title">eye movements during visual foraging</title>
 <desc id="hero-visual-desc">eight gratings in a vertically oriented poisson-like arrangement, with two previous saccades and one upcoming animated saccade.</desc>
-<style>
-  .foraging-hero { width: 100%; height: auto; overflow: visible; }
-  .foraging-hero .foraging-label {
-    font-family: Manrope, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: .09em;
-    fill: #6f7a84;
-  }
-  .foraging-hero .foraging-label-accent { fill: #f06449; }
-  .foraging-hero .foraging-grating {
-    stroke: #9ca4ab;
-    stroke-width: 1.5;
-  }
-  .foraging-hero .foraging-grating-visited {
-    stroke: #55bfd2;
-    stroke-width: 1.7;
-  }
-  .foraging-hero .foraging-grating-target {
-    stroke: #00a8c6;
-    stroke-width: 2.2;
-  }
-  .foraging-hero .foraging-fixation-ring {
-    fill: rgba(0, 168, 198, .05);
-    stroke: #00a8c6;
-    stroke-width: 1.4;
-  }
-  .foraging-hero .foraging-target-dot { fill: #f06449; }
-  .foraging-hero .foraging-saccade-previous {
-    fill: none;
-    stroke: #f06449;
-    stroke-width: 2.6;
-    stroke-linecap: round;
-    stroke-dasharray: 7 8;
-    stroke-opacity: .28;
-    animation: foraging-dash 1.15s linear infinite;
-  }
-  .foraging-hero .foraging-saccade-current-shadow {
-    fill: none;
-    stroke: #f06449;
-    stroke-width: 14;
-    stroke-linecap: round;
-    opacity: .08;
-    filter: blur(8px);
-  }
-  .foraging-hero .foraging-saccade-current {
-    fill: none;
-    stroke: #f06449;
-    stroke-width: 3.6;
-    stroke-linecap: round;
-    stroke-dasharray: 10 9;
-    animation: foraging-dash 1.15s linear infinite;
-  }
-  @keyframes foraging-dash {
-    to { stroke-dashoffset: -38; }
-  }
-</style>
 <defs>
   <pattern id="foraging-grating-1" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(-16)">
     <rect width="10" height="10" fill="#f4f1ea"></rect>
@@ -204,14 +147,14 @@
 <circle cx="547" cy="150" r="118" fill="url(#foraging-field)"></circle>
 
 <!-- gratings -->
-<circle class="foraging-grating" cx="330" cy="86" r="28" style="fill:url(#foraging-grating-1)"></circle>
-<circle class="foraging-grating" cx="264" cy="341" r="28" style="fill:url(#foraging-grating-3)"></circle>
-<circle class="foraging-grating" cx="636" cy="354" r="28" style="fill:url(#foraging-grating-5)"></circle>
-<circle class="foraging-grating" cx="567" cy="544" r="28" style="fill:url(#foraging-grating-7)"></circle>
-<circle class="foraging-grating-visited" cx="226" cy="559" r="28" style="fill:url(#foraging-grating-8)"></circle>
-<circle class="foraging-grating-visited" cx="396" cy="637" r="28" style="fill:url(#foraging-grating-9)"></circle>
-<circle class="foraging-grating-visited" cx="450" cy="354" r="28" style="fill:url(#foraging-grating-4)"></circle>
-<circle class="foraging-grating-target" cx="547" cy="150" r="28" style="fill:url(#foraging-grating-target-pattern)"></circle>
+<circle class="foraging-grating" cx="330" cy="86" r="28" fill="url(#foraging-grating-1)"></circle>
+<circle class="foraging-grating" cx="264" cy="341" r="28" fill="url(#foraging-grating-3)"></circle>
+<circle class="foraging-grating" cx="636" cy="354" r="28" fill="url(#foraging-grating-5)"></circle>
+<circle class="foraging-grating" cx="567" cy="544" r="28" fill="url(#foraging-grating-7)"></circle>
+<circle class="foraging-grating-visited" cx="226" cy="559" r="28" fill="url(#foraging-grating-8)"></circle>
+<circle class="foraging-grating-visited" cx="396" cy="637" r="28" fill="url(#foraging-grating-9)"></circle>
+<circle class="foraging-grating-visited" cx="450" cy="354" r="28" fill="url(#foraging-grating-4)"></circle>
+<circle class="foraging-grating-target" cx="547" cy="150" r="28" fill="url(#foraging-grating-target-pattern)"></circle>
 
 <!-- saccades on top of gratings -->
 <line class="foraging-saccade-previous" x1="226" y1="559" x2="396" y2="637"></line>
@@ -226,9 +169,6 @@
   mask="url(#foraging-saccade-fade-mask)"
   d="M450 354 C476 296, 512 218, 547 150"
 ></path>
-
-<!-- microsaccades and target marker -->
-
 
 <circle cx="547" cy="150" r="44" fill="rgba(0,168,198,.04)" stroke="#00a8c6" stroke-width="1.5"></circle>
 <circle class="foraging-target-dot" cx="450" cy="354" r="6.5"></circle>
@@ -260,7 +200,6 @@
 <p class="card-kicker">selection</p>
 <h3>presaccadic perception</h3>
 <p>how visual sensitivity and neural representations change at the future point of fixation before saccades.</p>
-<!-- <a href="#featured-study">view current work <span aria-hidden="true">→</span></a> -->
 </div>
 <div aria-hidden="true" class="card-graphic graphic-target">
   <img alt="" src="presacc.svg"/>
@@ -271,7 +210,6 @@
 <p class="card-kicker">active sampling</p>
 <h3>foraging and visual search</h3>
 <p>investigating perception and decision making in naturalistic tasks.</p>
-<!-- <a href="#featured-study">read the research question <span aria-hidden="true">→</span></a> -->
 </div>
 <div aria-hidden="true" class="card-graphic graphic-foraging">
   <img alt="" src="foraging.svg"/>
@@ -282,7 +220,6 @@
 <p class="card-kicker">dynamics</p>
 <h3>neural mechanisms of active vision</h3>
 <p>how neuronal populations across the visual and oculomotor systems coordinate perception and action.</p>
-<!-- <a href="#methods">explore our methods <span aria-hidden="true">→</span></a> -->
 </div>
 <div aria-hidden="true" class="card-graphic graphic-neural">
   <img alt="" src="raster.svg"/>
@@ -354,8 +291,8 @@
 <div>
 <p class="footer-label">profiles</p>
 <a href="https://github.com/activislab" rel="noopener noreferrer" target="_blank">github</a>
-<a href="#">google scholar</a>
-<a href="#">orcid</a>
+<a href="https://scholar.google.com/citations?hl=en&amp;user=Nxv1kJoAAAAJ" rel="noopener noreferrer" target="_blank">google scholar</a>
+<a href="https://orcid.org/0000-0002-6841-5240" rel="noopener noreferrer" target="_blank">orcid</a>
 </div>
 </div>
 <div class="shell footer-bottom">
