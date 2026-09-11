@@ -9,14 +9,8 @@ if (year) {
 
 if (menuToggle && nav) {
   menuToggle.addEventListener("click", () => {
-    const isOpen =
-      menuToggle.getAttribute("aria-expanded") === "true";
-
-    menuToggle.setAttribute(
-      "aria-expanded",
-      String(!isOpen)
-    );
-
+    const isOpen = menuToggle.getAttribute("aria-expanded") === "true";
+    menuToggle.setAttribute("aria-expanded", String(!isOpen));
     nav.classList.toggle("is-open", !isOpen);
   });
 
@@ -28,25 +22,15 @@ if (menuToggle && nav) {
   });
 }
 
-function updateHeader() {
+const updateHeader = () => {
   if (!header) return;
-
-  header.classList.toggle(
-    "is-scrolled",
-    window.scrollY > 12
-  );
-}
+  header.classList.toggle("is-scrolled", window.scrollY > 12);
+};
 
 updateHeader();
+window.addEventListener("scroll", updateHeader, { passive: true });
 
-window.addEventListener(
-  "scroll",
-  updateHeader,
-  { passive: true }
-);
-
-const revealElements =
-  document.querySelectorAll(".reveal");
+const revealElements = document.querySelectorAll(".reveal");
 
 if ("IntersectionObserver" in window) {
   const observer = new IntersectionObserver(
@@ -60,15 +44,11 @@ if ("IntersectionObserver" in window) {
     },
     {
       threshold: 0.08,
-      rootMargin: "0px 0px -40px 0px"
+      rootMargin: "0px 0px -40px 0px",
     }
   );
 
-  revealElements.forEach((element) => {
-    observer.observe(element);
-  });
+  revealElements.forEach((element) => observer.observe(element));
 } else {
-  revealElements.forEach((element) => {
-    element.classList.add("is-visible");
-  });
+  revealElements.forEach((element) => element.classList.add("is-visible"));
 }
