@@ -1,0 +1,775 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Place and estimate a magnification-scaled V1 simple-cell receptive field with full-field spike-triggered reverse correlation.">
+  <title>V1 receptive field mapping demo — activislab</title>
+  <style>
+    :root {
+      --ink: #172124; --muted: #697577; --paper: #f1eee6; --panel: #fbfaf6;
+      --line: #d7d3c8; --line-dark: #b9b5aa; --accent: #e55737;
+      --accent-dark: #b93f28; --teal: #247d79; --night: #070a0b;
+      --night-soft: #111719; --shadow: 0 24px 65px rgba(39,34,25,.11);
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    }
+    * { box-sizing: border-box; }
+    html { min-width: 320px; scroll-behavior: smooth; }
+    body { min-height: 100%; margin: 0; overflow-x: hidden; background: radial-gradient(circle at 7% 2%, rgba(255,255,255,.9), transparent 26rem), var(--paper); color: var(--ink); font-family: var(--sans); }
+    button, input { font: inherit; accent-color: var(--accent); }
+    button { -webkit-tap-highlight-color: transparent; }
+    button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid rgba(36,125,121,.36); outline-offset: 3px; }
+    a { color: inherit; }
+    .sim-shell { min-height: 100vh; padding: 22px clamp(16px, 2.5vw, 40px) 64px; }
+    .sim-header, .status-line, .sim-layout, .mapping-section, .science-section, .references-section, footer { width: min(1540px, 100%); margin-inline: auto; }
+    .sim-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 28px; padding: 5px 2px 15px; }
+    .title-lockup { max-width: 900px; }
+    .lab-brand { display: inline-flex; align-items: center; gap: 12px; margin: 0 0 10px; color: var(--ink); text-decoration: none; }
+    .brand-mark { position: relative; display: block; width: 43px; height: 32px; }
+    .brand-mark i { position: absolute; inset: 0 auto auto 0; width: 30px; height: 26px; border: 2px solid var(--ink); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+    .brand-mark i:nth-child(2) { left: 12px; transform: rotate(180deg); }
+    .brand-mark i:nth-child(3) { inset: 8px auto auto 10px; width: 20px; height: 17px; }
+    .lab-brand-copy { display: grid; line-height: 1.05; }
+    .lab-brand-copy strong { font-size: 16px; font-weight: 700; letter-spacing: .14em; }
+    .lab-brand-copy small { margin-top: 3px; color: var(--muted); font-size: 10px; }
+    .eyebrow { margin: 0 0 7px; color: var(--accent-dark); font-size: 11px; font-weight: 760; letter-spacing: .13em; line-height: 1.2; text-transform: uppercase; }
+    h1, h2, p { overflow-wrap: anywhere; }
+    h1 { max-width: 930px; margin: 0; font-size: clamp(38px, 4.2vw, 60px); font-weight: 565; letter-spacing: -.058em; line-height: .92; }
+    h2 { margin: 0; font-size: 25px; font-weight: 610; letter-spacing: -.035em; line-height: 1; }
+    .lede { max-width: 820px; margin: 11px 0 0; color: var(--muted); font-size: clamp(13px, 1.2vw, 16px); line-height: 1.5; }
+    .header-readout { display: grid; flex: 0 0 auto; min-width: 190px; gap: 3px; padding: 14px 16px; border: 1px solid var(--line-dark); border-radius: 11px; background: rgba(255,255,255,.44); }
+    .header-readout span, .header-readout small { color: var(--muted); font-size: 9px; text-transform: uppercase; letter-spacing: .09em; }
+    .header-readout b { font-family: var(--mono); font-size: 15px; }
+    .status-line { display: flex; align-items: center; gap: 8px; min-height: 36px; margin-bottom: 11px; padding: 7px 12px; border: 1px solid rgba(36,125,121,.22); border-radius: 8px; background: rgba(235,244,239,.64); color: #526363; font-size: 11px; line-height: 1.35; }
+    .status-line b { color: var(--ink); }
+    .status-dot { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: #909b99; }
+    .status-dot.live { background: var(--teal); box-shadow: 0 0 0 3px rgba(36,125,121,.12); animation: pulse 1.4s ease-in-out infinite; }
+    .status-note { margin-left: auto; color: var(--teal); font-weight: 720; white-space: nowrap; }
+    @keyframes pulse { 50% { box-shadow: 0 0 0 7px rgba(36,125,121,0); } }
+    .sim-layout { display: grid; grid-template-columns: minmax(0,1fr) clamp(430px,34vw,500px); grid-template-areas: "controls maps" "stage maps"; align-items: start; overflow: clip; border: 1px solid var(--line); border-radius: 19px; background: var(--night); box-shadow: var(--shadow); }
+    .stage-column { grid-area: stage; min-width: 0; overflow: hidden; background: var(--night); color: #fff; }
+    .stage-toolbar { min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 6px 13px; border-bottom: 1px solid rgba(255,255,255,.11); background: #162123; }
+    .stage-label { display: flex; flex-wrap: wrap; align-items: baseline; gap: 7px 10px; }
+    .stage-label span { font-size: 11px; font-weight: 720; }
+    .stage-label b { color: rgba(255,255,255,.5); font: 550 9px var(--mono); }
+    .stage-tools { display: flex; flex: 0 0 auto; align-items: center; gap: 6px; }
+    .stage-action, .transport-button, .play-button { min-height: 34px; border-radius: 999px; cursor: pointer; padding: 6px 13px; font-size: 11px; font-weight: 690; }
+    .stage-action { border: 1px solid rgba(255,255,255,.2); background: transparent; color: rgba(255,255,255,.76); }
+    .stage-action:hover, .transport-button:hover { border-color: rgba(255,255,255,.42); color: #fff; }
+    .stage-action[aria-pressed="true"] { border-color: var(--teal); background: var(--teal); color: #fff; }
+    .stage { position: relative; width: 100%; aspect-ratio: 16 / 8.4; min-height: 0; overflow: hidden; background: #777; isolation: isolate; }
+    .stage canvas { display: block; width: 100%; height: 100%; cursor: crosshair; touch-action: manipulation; }
+    .stage-column:fullscreen { width: 100vw; height: 100vh; display: grid; grid-template-rows: auto minmax(0,1fr) auto; background: #000; }
+    .stage-column:fullscreen .stage { width: 100%; height: 100%; aspect-ratio: auto; }
+    .stage-column:fullscreen .cortical-site { display: none; }
+    .transport { display: flex; flex-wrap: wrap; align-items: center; gap: 7px 14px; min-height: 52px; padding: 9px 13px; border-top: 1px solid rgba(255,255,255,.1); background: #121c1e; }
+    .transport-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
+    .play-button { border: 1px solid transparent; background: var(--accent); color: #fff; }
+    .play-button:hover { background: var(--accent-dark); }
+    .transport-button { border: 1px solid rgba(255,255,255,.18); background: transparent; color: rgba(255,255,255,.78); }
+    .transport-button[aria-pressed="true"] { border-color: var(--teal); background: var(--teal); color: #fff; }
+    .stimulus-key { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 13px; margin-left: auto; color: rgba(255,255,255,.57); font-size: 9px; }
+    .stimulus-key span { display: inline-flex; align-items: center; gap: 6px; }
+    .stimulus-key i { width: 16px; height: 6px; border: 1px solid rgba(255,255,255,.45); background: linear-gradient(90deg,#000 0 50%,#fff 50%); }
+    .stimulus-key em { font-style: normal; }
+    .stimulus-key b { color: #fff; font-family: var(--mono); }
+    .control-panel { grid-area: controls; display: grid; grid-template-columns: minmax(145px,.38fr) minmax(360px,1.12fr) minmax(300px,.94fr); align-items: stretch; background: var(--panel); border-bottom: 1px solid var(--line); }
+    .control-heading { display: grid; align-content: center; gap: 7px; padding: 12px 14px; border-right: 1px solid var(--line); }
+    .control-heading .eyebrow { margin-bottom: 5px; }
+    .control-heading h2 { font-size: 20px; }
+    .unit-badge { width: fit-content; border-radius: 99px; background: #e7f1ed; color: #23625f; padding: 5px 8px; font-size: 8px; font-weight: 760; text-transform: uppercase; letter-spacing: .06em; }
+    .fixed-site { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 6px; padding: 10px 12px 9px; border-right: 1px solid var(--line); background: #f3f0e8; }
+    .fixed-site div { display: grid; align-content: center; gap: 2px; min-width: 0; padding: 7px 8px; border: 1px solid var(--line); border-radius: 7px; background: var(--panel); }
+    .fixed-site span { color: var(--muted); font-size: 9px; text-transform: uppercase; letter-spacing: .06em; }
+    .fixed-site b { overflow: hidden; font: 700 12px var(--mono); text-overflow: ellipsis; white-space: nowrap; }
+    .fixed-site p { grid-column: 1 / -1; margin: 1px 1px 0; color: var(--muted); font-size: 7.5px; line-height: 1.35; }
+    .tuning-controls { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); align-items: center; gap: 17px; padding: 9px 15px; }
+    .range-control { display: block; min-width: 0; padding: 6px 0; border-bottom: 0; cursor: ew-resize; }
+    .range-control + .range-control { padding-left: 17px; border-left: 1px solid #e8e4da; }
+    .range-control:last-child { border-bottom: 0; }
+    .range-control > span { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; }
+    .range-control b { font-size: 11px; font-weight: 690; }
+    .range-control output { color: var(--accent-dark); font: 700 11px var(--mono); }
+    .range-control input { width: 100%; height: 20px; margin: 6px 0 1px; cursor: ew-resize; appearance: none; background: transparent; }
+    .range-control input::-webkit-slider-runnable-track { height: 3px; border-radius: 99px; background: #d3d1ca; }
+    .range-control input::-webkit-slider-thumb { width: 14px; height: 14px; margin-top: -5.5px; appearance: none; border: 2px solid #fff; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 1px rgba(185,63,40,.42), 0 2px 4px rgba(0,0,0,.13); }
+    .range-control input::-moz-range-track { height: 3px; border-radius: 99px; background: #d3d1ca; }
+    .range-control input::-moz-range-thumb { width: 11px; height: 11px; border: 2px solid #fff; border-radius: 50%; background: var(--accent); }
+    .range-control small { display: flex; justify-content: space-between; color: var(--muted); font-size: 8px; }
+    .range-control small i { font-style: normal; }
+    .cortical-site { padding: 12px 14px 14px; border-top: 1px solid rgba(255,255,255,.1); background: #090d0e; }
+    .retinotopy-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+    .retinotopy-heading div { display: grid; gap: 3px; }
+    .retinotopy-heading span { color: #f17a5f; font: 650 8px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+    .retinotopy-heading h3 { margin: 0; color: #fff; font-size: 13px; font-weight: 690; letter-spacing: -.015em; }
+    .retinotopy-heading output { flex: 0 0 auto; color: #58c6bf; font: 700 9px var(--mono); }
+    .retinotopy-figure { display: grid; gap: 8px; }
+    .cortex-pairs { display: grid; grid-template-columns: repeat(2,minmax(0,320px)); justify-content: space-between; gap: clamp(24px,5vw,72px); width: min(90%,820px); margin-inline: auto; }
+    .hemisphere-card { min-width: 0; padding: 7px; border: 1px solid rgba(255,255,255,.17); border-radius: 8px; background: #f7f7f5; color: var(--ink); }
+    .hemisphere-heading { display: grid; grid-template-columns: 31px minmax(0,2fr) minmax(0,1fr); align-items: end; gap: 6px; margin-bottom: 5px; }
+    .hemisphere-heading b { font-size: 21px; font-weight: 540; line-height: .88; }
+    .hemisphere-heading span { text-align: center; font-size: clamp(10px,.95vw,13px); font-weight: 560; letter-spacing: -.025em; }
+    .surface-grid { display: grid; grid-template-columns: minmax(0,2fr) minmax(0,1fr); gap: 6px; padding-left: 37px; }
+    .cortex-view { --site-color: #39d984; position: relative; overflow: hidden; border: 1px solid #a7a7a3; background: #d7d7d4; isolation: isolate; transition: border-color .2s ease, box-shadow .2s ease, opacity .2s ease; }
+    .cortex-view.lateral { aspect-ratio: 214 / 208; }
+    .cortex-view.medial { aspect-ratio: 106 / 208; }
+    .cortex-view img { position: absolute; display: block; max-width: none; height: auto; user-select: none; pointer-events: none; }
+    .cortex-view.lateral img { left: -43.925%; width: 207.477%; }
+    .cortex-view.medial img { left: -305.66%; width: 418.868%; }
+    .cortex-view.left img { top: -70.192%; }
+    .cortex-view.right img { top: -189.423%; }
+    .cortex-view.active { z-index: 1; border-color: color-mix(in srgb, var(--site-color), #172124 20%); box-shadow: 0 0 0 2px color-mix(in srgb, var(--site-color), transparent 42%); }
+    .electrode-marker { position: absolute; z-index: 2; left: var(--marker-x); top: var(--marker-y); width: 12px; height: 12px; border: 2px solid #fff; border-radius: 50%; background: var(--marker-color); box-shadow: 0 0 0 1.5px #172124, 0 0 0 6px color-mix(in srgb, var(--marker-color), transparent 64%); transform: translate(-50%,-50%); pointer-events: none; transition: left .22s ease, top .22s ease; }
+    .electrode-marker.secondary { opacity: .82; }
+    .electrode-marker[hidden] { display: none; }
+    .whole-brain-card { width: min(60%,540px); margin-inline: auto; padding: 7px 8px 8px; border: 1px solid rgba(255,255,255,.17); border-radius: 8px; background: #f7f7f5; }
+    .whole-brain-card > span { display: block; margin: 0 0 6px 2px; color: #586265; font: 650 8px var(--mono); letter-spacing: .07em; text-transform: uppercase; }
+    .whole-brain-frame { position: relative; overflow: hidden; width: 100%; aspect-ratio: 846 / 178; background: #fff; }
+    .whole-brain-frame img { position: absolute; inset: 0 auto auto 0; display: block; width: 100%; height: auto; transform: translateY(-7.48%); }
+    .retinotopy-footer { display: grid; grid-template-columns: minmax(0,1fr) minmax(220px,.85fr); gap: 14px; align-items: end; padding-top: 8px; }
+    .retinotopy-readout { display: grid; gap: 3px; }
+    .retinotopy-readout b { color: #fff; font: 700 10px var(--mono); }
+    .retinotopy-readout span { color: rgba(255,255,255,.55); font-size: 9px; line-height: 1.35; }
+    .retinotopy-readout small { width: fit-content; margin-top: 2px; padding: 3px 5px; border-radius: 4px; background: rgba(63,166,158,.2); color: #73d4cd; font: 650 7px var(--mono); letter-spacing: .03em; text-transform: uppercase; }
+    .retinotopy-readout small.extrapolated { background: rgba(229,87,55,.18); color: #f17a5f; }
+    .retinotopy-note { margin: 0; color: rgba(255,255,255,.43); font-size: 8px; line-height: 1.45; }
+    .retinotopy-note a { color: #f17a5f; font-weight: 680; text-underline-offset: 2px; }
+    .mapping-section { grid-area: maps; min-width: 0; width: 100%; align-self: stretch; padding: 13px 11px 15px; border-left: 1px solid var(--line); background: #f7f5ef; color: var(--ink); }
+    .mapping-heading { display: block; margin-bottom: 10px; }
+    .mapping-heading .eyebrow { margin-bottom: 4px; color: var(--accent-dark); font-size: 8px; }
+    .mapping-heading h2 { color: var(--ink); font-size: clamp(19px,1.65vw,24px); line-height: 1.08; }
+    .mapping-heading > p { max-width: 340px; margin: 7px 0 0; color: var(--muted); font-size: 8px; line-height: 1.4; text-align: left; }
+    .mapping-grid { display: grid; grid-template-columns: 1fr; gap: 9px; }
+    .map-panel { min-width: 0; overflow: hidden; border: 1px solid #cbc7bb; border-radius: 13px; background: #fff; color: var(--ink); box-shadow: 0 10px 28px rgba(31,27,20,.07); }
+    .map-panel.fit-panel { border-color: #cbc7bb; background: #fff; color: var(--ink); }
+    .map-panel header { display: flex; align-items: baseline; justify-content: space-between; gap: 9px; min-height: 43px; padding: 8px 10px 7px; border-bottom: 1px solid rgba(23,33,36,.13); }
+    .map-panel.fit-panel header { border-color: rgba(23,33,36,.13); }
+    .panel-title { display: grid; gap: 3px; }
+    .panel-title span { color: var(--accent-dark); font: 650 8px var(--mono); letter-spacing: .06em; }
+    .fit-panel .panel-title span { color: var(--accent-dark); }
+    .panel-title h3 { margin: 0; font-size: 11.5px; font-weight: 650; letter-spacing: -.01em; }
+    .map-panel output { flex: 0 0 auto; color: #4d595c; font: 650 9px var(--mono); }
+    .fit-panel output { color: #4d595c; }
+    .map-canvas-wrap { position: relative; width: 100%; aspect-ratio: 1.85 / 1; }
+    .fit-panel .map-canvas-wrap, .rf-map-panel .map-canvas-wrap { aspect-ratio: 1.4 / 1; }
+    .map-canvas-wrap canvas { display: block; width: 100%; height: 100%; }
+    .panel-caption { display: -webkit-box; min-height: 0; margin: 0; overflow: hidden; padding: 7px 10px 8px; border-top: 1px solid rgba(23,33,36,.13); background: #fbfaf6; color: var(--muted); font-size: 7.5px; line-height: 1.35; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+    .fit-panel .panel-caption { border-color: rgba(23,33,36,.13); color: var(--muted); }
+    .heat-scale { position: absolute; z-index: 2; top: 8px; left: 50%; width: min(170px,52%); padding: 4px 5px 5px; border-radius: 5px; background: rgba(255,255,255,.78); pointer-events: none; transform: translateX(-50%); }
+    .heat-scale > span { display: flex; justify-content: space-between; margin-bottom: 4px; color: rgba(23,33,36,.72); font: 650 8px var(--mono); }
+    .heat-scale i { display: block; height: 6px; background: linear-gradient(90deg,#1665d8,#70b7ec 25%,#777 50%,#f3aa78 75%,#ef3d28); }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    .science-section { padding: clamp(62px,7vw,98px) 1px clamp(58px,6vw,86px); border-bottom: 1px solid var(--line); }
+    .section-intro { max-width: 660px; }
+    .section-intro h2 { font-size: clamp(29px,3.5vw,45px); line-height: 1; }
+    .section-intro > p:last-child { margin: 16px 0 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+    .science-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: clamp(20px,4vw,62px); margin-top: clamp(32px,5vw,58px); }
+    .science-grid article { padding-top: 14px; border-top: 1px solid var(--line-dark); }
+    .science-grid article > span { display: inline-block; margin-bottom: 24px; color: var(--accent-dark); font: 650 9px var(--mono); }
+    .science-grid h3 { margin: 0; font-size: 18px; font-weight: 650; letter-spacing: -.025em; }
+    .science-grid p { margin: 9px 0 0; color: var(--muted); font-size: 11px; line-height: 1.62; }
+    .references-section { display: grid; grid-template-columns: minmax(250px,.62fr) minmax(0,1.45fr); gap: clamp(35px,7vw,105px); padding: clamp(60px,7vw,100px) 1px; }
+    .reference-list { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line-dark); }
+    .reference-list li { display: grid; grid-template-columns: 38px minmax(0,1fr); gap: 10px; padding: 17px 0 18px; border-bottom: 1px solid var(--line); }
+    .reference-list li > span { padding-top: 2px; color: var(--accent-dark); font: 650 9px var(--mono); }
+    .reference-list p { margin: 0; color: var(--ink); font-size: 11px; line-height: 1.55; }
+    .reference-list .phenomenon { margin-bottom: 5px; color: var(--teal); font-size: 8px; font-weight: 760; letter-spacing: .06em; text-transform: uppercase; }
+    .reference-list a { display: inline-block; margin: 5px 12px 0 0; color: var(--accent-dark); font-size: 9px; font-weight: 670; text-decoration: underline; text-decoration-color: rgba(185,63,40,.28); text-underline-offset: 3px; }
+    footer { display: flex; justify-content: space-between; gap: 38px; padding: 22px 1px 0; border-top: 1px solid var(--line); color: var(--muted); }
+    footer p { max-width: 980px; margin: 0; font-size: 10px; line-height: 1.55; }
+    footer p:last-child { flex: 0 0 auto; color: var(--ink); font: 650 9px var(--mono); }
+    @media (min-width: 1321px) and (max-height: 950px) { .sim-shell { padding-top: 14px; } .sim-header { padding-bottom: 10px; } .lab-brand { margin-bottom: 6px; } h1 { font-size: clamp(38px,3.6vw,52px); } .lede { margin-top: 8px; font-size: 12.5px; line-height: 1.4; } .status-line { min-height: 32px; margin-bottom: 8px; } .mapping-section { padding: 9px; } .mapping-heading { margin-bottom: 8px; } .mapping-heading h2 { font-size: 20px; } .mapping-heading > p { display: none; } .mapping-grid { gap: 7px; } .map-panel header { min-height: 39px; padding: 6px 8px; } .map-canvas-wrap { aspect-ratio: 2 / 1; } .fit-panel .map-canvas-wrap, .rf-map-panel .map-canvas-wrap { aspect-ratio: 1.55 / 1; } .panel-caption { padding: 5px 8px 6px; font-size: 7px; } }
+    @media (max-width: 1320px) { .sim-layout { grid-template-columns: 1fr; grid-template-areas: "controls" "stage" "maps"; } .control-panel { grid-template-columns: minmax(190px,.42fr) minmax(0,1fr); } .fixed-site { border-right: 0; } .tuning-controls { grid-column: 1 / -1; border-top: 1px solid var(--line); } .mapping-section { border-top: 1px solid var(--line); border-left: 0; } .mapping-grid { grid-template-columns: repeat(3,minmax(0,1fr)); } .fit-panel .map-canvas-wrap, .rf-map-panel .map-canvas-wrap { aspect-ratio: 1.45 / 1; } }
+    @media (max-width: 900px) { .sim-header { align-items: flex-start; } .header-readout { display: none; } .stage { min-height: 360px; } .references-section { grid-template-columns: 1fr; } .science-grid { gap: 24px; } }
+    @media (max-width: 700px) { .control-panel { grid-template-columns: 1fr; } .control-heading { border-right: 0; border-bottom: 1px solid var(--line); } .fixed-site { grid-template-columns: repeat(2,minmax(0,1fr)); } .tuning-controls { grid-template-columns: 1fr; } .range-control + .range-control { padding-left: 0; border-top: 1px solid #e8e4da; border-left: 0; } .mapping-grid { grid-template-columns: 1fr; } .cortex-pairs { width: 100%; grid-template-columns: 1fr; } .whole-brain-card { width: 100%; } .retinotopy-footer { grid-template-columns: 1fr; } }
+    @media (max-width: 620px) { .sim-shell { padding: 20px 12px 50px; } .sim-header { padding-bottom: 17px; } h1 { font-size: 42px; } .status-line { align-items: flex-start; flex-wrap: wrap; } .status-note { width: 100%; margin-left: 15px; } .stage-toolbar { align-items: flex-start; } .stage-label b { width: 100%; } .stage { aspect-ratio: 1.1; min-height: 330px; } .stimulus-key { width: 100%; margin-left: 0; } .hemisphere-heading span { font-size: 14px; } .mapping-heading > p { margin-top: 9px; } .science-grid { grid-template-columns: 1fr; } .science-grid article > span { margin-bottom: 10px; } .references-section { gap: 30px; } footer { flex-direction: column; gap: 14px; } }
+    @media (prefers-reduced-motion: reduce) { .status-dot.live { animation: none; } }
+  </style>
+</head>
+<body>
+  <main class="sim-shell">
+    <header class="sim-header">
+      <div class="title-lockup">
+        <a class="lab-brand" href="https://activislab.com/" target="_blank" rel="noreferrer"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span class="lab-brand-copy"><strong>activislab</strong><small>active vision laboratory</small></span></a>
+        <p class="eyebrow">Receptive field mapping · module 01</p>
+        <h1>V1 simple cell simulator</h1>
+        <p class="lede">Click anywhere on the 80°-wide tangent screen to place the cell’s receptive-field center. Its diameter grows with eccentricity using macaque V1 scaling; map the signed field with sparse dots or a contrast-modulated noise movie.</p>
+      </div>
+      <div class="header-readout"><span>Recording site</span><b id="recording-site">V1 · 6.0°</b><small id="recording-location">center +6.0°, 0.0°</small></div>
+    </header>
+    <section class="status-line"><span class="status-dot live" id="status-dot" aria-hidden="true"></span><b id="status-title">Mapping in progress</b><span id="status-detail">Preparing balanced full-screen dot sequence</span><span class="status-note" id="status-note">280 dots/frame · 20 ms · 60 ms lag</span><span class="sr-only" id="sweep-announcement" aria-live="polite"></span></section>
+    <div class="sim-layout">
+      <aside class="control-panel" aria-label="Cell tuning controls">
+        <div class="control-heading"><div><p class="eyebrow">Cell tuning</p><h2>Choose the filter</h2></div><span class="unit-badge">simple cell</span></div>
+        <section class="fixed-site"><div><span>RF center · x, y</span><b id="center-output">+6.0°, 0.0°</b></div><div><span>Eccentricity</span><b id="eccentricity-output">6.0°</b></div><div><span>RF diameter</span><b id="diameter-output">1.26°</b></div><div><span>Visual field</span><b id="field-output">80° × 42°</b></div><p>Click the stimulus screen to place the RF. Diameter uses the physiological V1 scaling <i>s</i> = 0.21 (diameter/eccentricity), with a 0.50° foveal floor; changing the center or tuning clears the estimate.</p></section>
+        <section class="tuning-controls">
+          <label class="range-control" for="orientation"><span><b>Preferred orientation</b><output id="orientation-output">90°</output></span><input id="orientation" type="range" min="0" max="175" step="5" value="90" aria-valuetext="90 degrees; zero is horizontal and ninety is vertical"><small><i>0° horizontal</i><i>90° vertical</i></small></label>
+          <label class="range-control" for="frequency"><span><b>Preferred spatial frequency</b><output id="frequency-output">2.2 c/°</output></span><input id="frequency" type="range" min="-1" max="4" step="0.125" value="1.125" aria-valuetext="2.2 cycles per degree"><small><i>0.5 c/° · coarse</i><i>16 c/° · fine</i></small></label>
+        </section>
+      </aside>
+      <section class="stage-column" id="stage-column" aria-label="Interactive receptive field mapping simulation">
+        <div class="stage-toolbar"><div class="stage-label"><span id="stage-mode-label">Stimulus screen · click to place RF</span><b id="probe-readout">80° × 42° full-screen dot frames</b></div><div class="stage-tools"><button type="button" class="stage-action" id="stimulus-mode" aria-label="Toggle contrast-modulated noise movie" aria-pressed="false">Contrast noise: off</button><button type="button" class="stage-action" id="fullscreen" aria-expanded="false">Fullscreen</button></div></div>
+        <div class="stage" id="stage"><canvas id="stimulus" tabindex="0" aria-label="Click or use the arrow keys to position the receptive-field center while a mapping stimulus fills the gray tangent screen" aria-describedby="canvas-description" aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown"></canvas><p id="canvas-description" class="sr-only">The display spans 80 degrees of visual angle horizontally, from minus 40 to plus 40 degrees, and 42 degrees vertically. Choose balanced bright and dark dots or a contrast-modulated Gaussian noise movie. Click to move the receptive-field center; arrow keys move it by half a degree and Shift plus an arrow moves it by one tenth of a degree. A central cross is the fixation target and a turquoise circle marks the selected receptive field.</p></div>
+        <div class="transport"><div class="transport-actions"><button type="button" class="play-button" id="play">Pause mapping</button><button type="button" class="transport-button" id="speed" aria-pressed="false">Speed up 4×</button><button type="button" class="transport-button" id="restart">Clear maps &amp; restart</button></div><div class="stimulus-key"><span><i aria-hidden="true"></i><em id="stimulus-key-label">bright / dark dots</em></span><span>frame <b id="angle-output">—</b></span><span>pass <b id="set-output">0/10</b></span><span>speed <b id="speed-output">1×</b></span></div></div>
+        <section class="cortical-site" aria-labelledby="electrode-heading">
+          <header class="retinotopy-heading"><div><span>01 · cortical site</span><h3 id="electrode-heading">Predicted electrode location</h3></div><output id="electrode-hemisphere">Left V1</output></header>
+          <div class="retinotopy-figure" id="retinotopy-figure" role="group" aria-label="Macaque group-average V1 surface views from Figure 5 with a marker showing the estimated electrode location">
+            <div class="cortex-pairs">
+              <article class="hemisphere-card" aria-label="Left V1 surface views">
+                <header class="hemisphere-heading"><b>L</b><span>Lateral</span><span>Medial</span></header>
+                <div class="surface-grid">
+                  <div class="cortex-view lateral left" id="cortex-left-lateral" data-hemisphere="left" data-surface="lateral"><img src="assets/figure-5-macaque-group-maps.png" alt=""><span class="electrode-marker" aria-hidden="true" hidden></span></div>
+                  <div class="cortex-view medial left" id="cortex-left-medial" data-hemisphere="left" data-surface="medial"><img src="assets/figure-5-macaque-group-maps.png" alt=""><span class="electrode-marker" aria-hidden="true" hidden></span></div>
+                </div>
+              </article>
+              <article class="hemisphere-card" aria-label="Right V1 surface views">
+                <header class="hemisphere-heading"><b>R</b><span>Lateral</span><span>Medial</span></header>
+                <div class="surface-grid">
+                  <div class="cortex-view lateral right" id="cortex-right-lateral" data-hemisphere="right" data-surface="lateral"><img src="assets/figure-5-macaque-group-maps.png" alt=""><span class="electrode-marker" aria-hidden="true" hidden></span></div>
+                  <div class="cortex-view medial right" id="cortex-right-medial" data-hemisphere="right" data-surface="medial"><img src="assets/figure-5-macaque-group-maps.png" alt=""><span class="electrode-marker" aria-hidden="true" hidden></span></div>
+                </div>
+              </article>
+            </div>
+            <div class="whole-brain-card"><span>Whole-brain reference</span><div class="whole-brain-frame"><img src="assets/figure-5-macaque-whole-brains.png" alt="Group-average macaque left and right hemispheres with the V1 surface regions boxed"></div></div>
+          </div>
+          <div class="retinotopy-footer">
+            <div class="retinotopy-readout"><b id="electrode-route">Right visual field → left V1</b><span id="electrode-detail">Lateral operculum · horizontal-meridian band · 6.0°</span><small id="electrode-confidence">Within Figure 5 range</small></div>
+            <p class="retinotopy-note">Group-average anatomical estimate, not a stereotactic coordinate. Figure adapted from Arcaro et al. (2022), Fig. 5, <a href="https://doi.org/10.1007/s00429-021-02427-0" target="_blank" rel="noreferrer">CC BY 4.0 ↗</a></p>
+          </div>
+        </section>
+      </section>
+      <section class="mapping-section" aria-labelledby="mapping-heading">
+        <div class="mapping-heading"><div><p class="eyebrow">Live reverse correlation</p><h2 id="mapping-heading">From spike-triggered stimuli to RF</h2></div><p id="mapping-method-copy">The estimator looks backward from every spike by 60 ms. Bright- and dark-triggered response rates are subtracted to reveal signed ON and OFF subregions.</p></div>
+        <div class="mapping-grid">
+          <article class="map-panel"><header><div class="panel-title"><span>01 · EVENTS</span><h3 id="events-title">Spike-triggered dot frames</h3></div><output id="spike-count">0 spikes</output></header><div class="map-canvas-wrap"><canvas id="spike-map" aria-label="Full-screen mapping stimulus with red marks for the strongest excitatory location in spike-triggered frames"></canvas></div><p class="panel-caption" id="events-caption">Gray shows sampled locations; red marks the strongest positive sample 60 ms before each spike.</p></article>
+          <article class="map-panel rf-map-panel"><header><div class="panel-title"><span>02 · FIRST ORDER</span><h3>Magnified reverse-correlation RF</h3></div><output id="peak-rate">±0 Hz</output></header><div class="map-canvas-wrap"><canvas id="rate-map" aria-label="Signed first-order receptive-field estimate in a fixed eight by eight degree window centered on the selected receptive field"></canvas><div class="heat-scale" aria-hidden="true"><span><b>OFF −</b><b id="heat-peak">±0 Hz</b><b>ON +</b></span><i></i></div></div><p class="panel-caption" id="rf-caption">Fixed 8° × 8° RF-centered window; the spatial scale does not change. Blue OFF, red ON, gray zero.</p></article>
+          <article class="map-panel fit-panel"><header><div class="panel-title"><span>03 · DATA FIT</span><h3>Enlarged fit of measured RF</h3></div><output id="fit-quality">collecting…</output></header><div class="map-canvas-wrap"><canvas id="data-fit" aria-label="Enlarged Gabor fit computed from the reverse-correlation measurements in panel two"></canvas></div><p class="panel-caption">The fitted Gabor appears after four passes; the dashed ellipse is the fitted Gaussian envelope.</p></article>
+        </div>
+      </section>
+    </div>
+    <section class="science-section" aria-labelledby="how-heading"><div class="section-intro"><p class="eyebrow">How to read the experiment</p><h2 id="how-heading">Position changes scale; spikes reveal structure</h2><p>The RF’s selected center determines its eccentricity and therefore its V1-scaled diameter. The signed structure is then estimated with the same first-order reverse correlation.</p></div><div class="science-grid"><article><span>01</span><h3>Place and scale the RF</h3><p>Clicking sets its center in visual degrees. The simulator applies the V1 diameter/eccentricity ratio of 0.21 from Freeman and Simoncelli’s physiological meta-analysis, with a small foveal floor.</p></article><article><span>02</span><h3>Look backward 60 ms</h3><p>For every spike, the estimator retrieves the complete earlier stimulus frame. Sparse dots use bright-minus-dark rates; the pink-noise movie uses a Fourier-whitened spike-triggered average.</p></article><article><span>03</span><h3>Fit the recovered field</h3><p>A least-squares Gabor fit estimates center, orientation, spatial frequency, phase, and envelope from panel 02’s measured signed RF. Panel 03 enlarges that fitted surface.</p></article></div></section>
+    <section class="references-section" aria-labelledby="references-heading"><div class="section-intro"><p class="eyebrow">Primary literature</p><h2 id="references-heading">Sources &amp; method boundary</h2><p>The estimator follows references 2, 3, and 8 of the supplied review: randomized bright/dark sparse noise, spike-triggered temporal alignment, and a signed first-order RF.</p></div><ol class="reference-list">
+      <li><span>01</span><div><p class="phenomenon">Supplied review · method synthesis</p><p>DeAngelis, G. C., Ohzawa, I. &amp; Freeman, R. D. (1995). <b>Receptive-field dynamics in the central visual pathways.</b> <i>Trends in Neurosciences, 18</i>, 451–458.</p><a href="https://doi.org/10.1016/0166-2236(95)94496-R" target="_blank" rel="noreferrer">doi:10.1016/0166-2236(95)94496-R ↗</a></div></li>
+      <li><span>02</span><div><p class="phenomenon">Review ref. 2 · 2D reverse correlation</p><p>Jones, J. P. &amp; Palmer, L. A. (1987). <b>The two-dimensional spatial structure of simple receptive fields in cat striate cortex.</b> <i>Journal of Neurophysiology, 58</i>, 1187–1211.</p><a href="https://doi.org/10.1152/jn.1987.58.6.1187" target="_blank" rel="noreferrer">doi:10.1152/jn.1987.58.6.1187 ↗</a></div></li>
+      <li><span>03</span><div><p class="phenomenon">Review ref. 3 · x-y-t reverse correlation</p><p>DeAngelis, G. C., Ohzawa, I. &amp; Freeman, R. D. (1993). <b>Spatiotemporal organization of simple-cell receptive fields in the cat’s striate cortex. I.</b> <i>Journal of Neurophysiology, 69</i>, 1091–1117.</p><a href="https://doi.org/10.1152/jn.1993.69.4.1091" target="_blank" rel="noreferrer">doi:10.1152/jn.1993.69.4.1091 ↗</a></div></li>
+      <li><span>04</span><div><p class="phenomenon">Review ref. 8 · first-order motion prediction</p><p>McLean, J., Raab, S. &amp; Palmer, L. A. (1994). <b>Contribution of linear mechanisms to the specification of local motion by simple cells in areas 17 and 18 of the cat.</b> <i>Visual Neuroscience, 11</i>, 271–294.</p><a href="https://doi.org/10.1017/S0952523800001632" target="_blank" rel="noreferrer">doi:10.1017/S0952523800001632 ↗</a></div></li>
+      <li><span>05</span><div><p class="phenomenon">Elongated ON/OFF subregions</p><p>Hubel, D. H. &amp; Wiesel, T. N. (1959). <b>Receptive fields of single neurones in the cat’s striate cortex.</b> <i>Journal of Physiology, 148</i>, 574–591.</p><a href="https://doi.org/10.1113/jphysiol.1959.sp006308" target="_blank" rel="noreferrer">doi:10.1113/jphysiol.1959.sp006308 ↗</a></div></li>
+      <li><span>06</span><div><p class="phenomenon">RF size &amp; cortical magnification</p><p>Hubel, D. H. &amp; Wiesel, T. N. (1974). <b>Uniformity of monkey striate cortex.</b> <i>Journal of Comparative Neurology, 158</i>, 295–305.</p><a href="https://doi.org/10.1002/cne.901580305" target="_blank" rel="noreferrer">doi:10.1002/cne.901580305 ↗</a></div></li>
+      <li><span>07</span><div><p class="phenomenon">Two-dimensional Gabor approximation</p><p>Jones, J. P. &amp; Palmer, L. A. (1987). <b>An evaluation of the two-dimensional Gabor filter model of simple receptive fields.</b> <i>Journal of Neurophysiology, 58</i>, 1233–1258.</p><a href="https://doi.org/10.1152/jn.1987.58.6.1233" target="_blank" rel="noreferrer">doi:10.1152/jn.1987.58.6.1233 ↗</a></div></li>
+      <li><span>08</span><div><p class="phenomenon">Gabor-shaped subunits · aspect ratio Y/X</p><p>Liu, L. et al. (2016). <b>Spatial structure of neuronal receptive field in awake monkey secondary visual cortex (V2).</b> <i>PNAS, 113</i>, 1913–1918.</p><a href="https://doi.org/10.1073/pnas.1525505113" target="_blank" rel="noreferrer">doi:10.1073/pnas.1525505113 ↗</a></div></li>
+      <li><span>09</span><div><p class="phenomenon">Accessible synthesis</p><p>Carandini, M. <b>Area V1.</b> <i>Scholarpedia.</i></p><a href="http://www.scholarpedia.org/article/Area_V1" target="_blank" rel="noreferrer">Scholarpedia ↗</a></div></li>
+      <li><span>10</span><div><p class="phenomenon">RF diameter scaling with eccentricity</p><p>Freeman, J. &amp; Simoncelli, E. P. (2011). <b>Metamers of the ventral stream.</b> <i>Nature Neuroscience, 14</i>, 1195–1201. Their physiological meta-analysis estimates V1 scaling at 0.21 ± 0.07.</p><a href="https://doi.org/10.1038/nn.2889" target="_blank" rel="noreferrer">doi:10.1038/nn.2889 ↗</a></div></li>
+      <li><span>11</span><div><p class="phenomenon">Macaque V1 cortical retinotopy</p><p>Arcaro, M. J., Livingstone, M. S., Kay, K. N. &amp; Weiner, K. S. (2022). <b>The retrocalcarine sulcus maps different retinotopic representations in macaques and humans.</b> <i>Brain Structure and Function, 227</i>, 1227–1245.</p><a href="https://doi.org/10.1007/s00429-021-02427-0" target="_blank" rel="noreferrer">doi:10.1007/s00429-021-02427-0 ↗</a></div></li>
+      <li><span>12</span><div><p class="phenomenon">Macaque V1 spatial-frequency selectivity · 16 c/° slider limit</p><p>De Valois, R. L., Albrecht, D. G. &amp; Thorell, L. G. (1982). <b>Spatial frequency selectivity of cells in macaque visual cortex.</b> <i>Vision Research, 22</i>(5), 545–559.</p><a href="https://doi.org/10.1016/0042-6989(82)90113-4" target="_blank" rel="noreferrer">doi:10.1016/0042-6989(82)90113-4 ↗</a></div></li>
+      <li><span>13</span><div><p class="phenomenon">Contrast-modulated 1/f Gaussian noise · Fourier-corrected STA</p><p>Niell, C. M. &amp; Stryker, M. P. (2008). <b>Highly selective receptive fields in mouse visual cortex.</b> <i>The Journal of Neuroscience, 28</i>(30), 7520–7536.</p><a href="https://www.jneurosci.org/content/28/30/7520" target="_blank" rel="noreferrer">Journal webpage ↗</a><a href="https://doi.org/10.1523/JNEUROSCI.0623-08.2008" target="_blank" rel="noreferrer">doi:10.1523/JNEUROSCI.0623-08.2008 ↗</a></div></li>
+    </ol></section>
+    <footer><p><b>Model &amp; limitations.</b> Either full-screen sparse dots or a zero-mean Gaussian movie with genuine pink spatial power P(f) ∝ 1/f from 0.05 to 16 c/° drives a signed Gabor-like linear filter followed by latency, response smoothing, rectification, and illustrative Poisson spikes. The movie uses 30 fps, a one-pole 4 Hz temporal low-pass approximation, and the 10 s global contrast cycle of Niell &amp; Stryker. Panel 02 subtracts finite-record baseline leakage, divides each represented Fourier component by its measured stimulus power, and applies a smooth high-frequency ridge/taper to stabilize the finite-data estimate. Its fixed 8° window uses a separate sampling grid that becomes finer for higher selected spatial frequencies. The 16 c/° passband is a macaque-scale adaptation of their mouse stimulus; the grayscale preview is visibly low-pass limited by screen pixels, while the neural model retains the full Fourier passband. Diameter follows max(0.50°, 0.21 × eccentricity). The electrode panel is a group-average surface estimate, not a penetration coordinate. Panel 03 fits only the online first-order estimate at one fixed lag.</p><p>V1 receptive-field mapping · module 01</p></footer>
+  </main>
+  <script>
+    (() => {
+      'use strict';
+      const FIELD_WIDTH_DEG = 80;
+      const FIELD_HEIGHT_DEG = FIELD_WIDTH_DEG * 8.4 / 16;
+      const V1_RF_SCALING = .21, FOVEAL_RF_DIAMETER_DEG = .5;
+      const DOT_DIAMETER_DEG = .16, DOTS_PER_FRAME = 280;
+      const PROBE_DURATION_MS = 20, CORRELATION_LAG_MS = 60, GRID_COLUMNS = 320, GRID_ROWS = 168;
+      const PROBES_PER_PASS = GRID_COLUMNS * GRID_ROWS * 2, TARGET_PASSES = 10;
+      const NOISE_FRAME_DURATION_MS = 1000 / 30, NOISE_CONTRAST_PERIOD_MS = 10000, NOISE_TEMPORAL_CUTOFF_HZ = 4;
+      const NOISE_TEMPORAL_TAU_MS = 1000 / (2 * Math.PI * NOISE_TEMPORAL_CUTOFF_HZ), NOISE_FRAMES_PER_PASS = Math.round(NOISE_CONTRAST_PERIOD_MS / NOISE_FRAME_DURATION_MS);
+      const NOISE_MIN_FREQUENCY_CPD = .05, NOISE_SPATIAL_CUTOFF_CPD = 16, NOISE_FREQUENCY_BANDS = 48, NOISE_ORIENTATION_BANDS = 32;
+      const NOISE_MODEL_RMS = .32, NOISE_WHITENING_RIDGE = .02, NOISE_DISPLAY_COLUMNS = 80, NOISE_DISPLAY_ROWS = Math.round(NOISE_DISPLAY_COLUMNS * FIELD_HEIGHT_DEG / FIELD_WIDTH_DEG);
+      const NOISE_RF_SAMPLES_PER_CYCLE = 2.25, NOISE_RF_MIN_GRID = 64, NOISE_RF_MAX_GRID = 288;
+      const HISTORY_WIDTH = 920, HISTORY_HEIGHT = Math.round(HISTORY_WIDTH * FIELD_HEIGHT_DEG / FIELD_WIDTH_DEG);
+      const GABOR_PHASE = Math.PI / 2;
+      const FIT_VIEW_SCALE = 1.25;
+      const RF_RATE_MAP_SPAN_DEG = 8;
+      const SPIKE_TRAIL_OPACITY = .11, RF_RATE_MAP_COLOR_FLOOR = .32;
+      const COLOR_DEAD_ZONE = .03, COLOR_RESPONSE_GAMMA = .55;
+      const GABOR_ASPECT_RATIO = 1.5, GAUSSIAN_EDGE_Z = Math.sqrt(-2 * Math.log(COLOR_DEAD_ZONE));
+      const BASELINE_RATE_HZ = .08, RESPONSE_GAIN_HZ = 260, MAX_RATE_HZ = 180, RESPONSE_TIME_CONSTANT_MS = 8;
+      const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
+      const NOISE_MODES = (() => {
+        const modes = [], ratio = (NOISE_SPATIAL_CUTOFF_CPD / NOISE_MIN_FREQUENCY_CPD) ** (1 / (NOISE_FREQUENCY_BANDS - 1)), deltaTheta = Math.PI / NOISE_ORIENTATION_BANDS;
+        let totalVariance = 0;
+        for (let band = 0; band < NOISE_FREQUENCY_BANDS; band += 1) {
+          const frequency = band === NOISE_FREQUENCY_BANDS - 1 ? NOISE_SPATIAL_CUTOFF_CPD : NOISE_MIN_FREQUENCY_CPD * ratio ** band;
+          const lower = band === 0 ? NOISE_MIN_FREQUENCY_CPD : NOISE_MIN_FREQUENCY_CPD * ratio ** (band - .5);
+          const upper = band === NOISE_FREQUENCY_BANDS - 1 ? NOISE_SPATIAL_CUTOFF_CPD : NOISE_MIN_FREQUENCY_CPD * ratio ** (band + .5);
+          // Pink means power density P(f) ∝ 1/f; coefficient amplitude is therefore proportional to sqrt(P).
+          const quadrature = (upper ** 2 - lower ** 2) * deltaTheta, pinkPower = 1 / frequency;
+          for (let orientation = 0; orientation < NOISE_ORIENTATION_BANDS; orientation += 1) {
+            const angle = (orientation + (band % 2) * .5) * deltaTheta, variance = pinkPower * quadrature;
+            modes.push({frequency,kx: frequency * Math.cos(angle),ky: frequency * Math.sin(angle),quadrature,scale: Math.sqrt(variance)}); totalVariance += variance;
+          }
+        }
+        const normalization = NOISE_MODEL_RMS / Math.sqrt(totalVariance);
+        for (const mode of modes) mode.scale *= normalization;
+        return modes;
+      })();
+      const elements = {
+        stage: document.getElementById('stage'), stageColumn: document.getElementById('stage-column'), stimulus: document.getElementById('stimulus'),
+        spikeMap: document.getElementById('spike-map'), rateMap: document.getElementById('rate-map'), dataFit: document.getElementById('data-fit'),
+        orientationInput: document.getElementById('orientation'),
+        frequencyInput: document.getElementById('frequency'), playButton: document.getElementById('play'),
+        speedButton: document.getElementById('speed'), restartButton: document.getElementById('restart'), fullscreenButton: document.getElementById('fullscreen'), stimulusModeButton: document.getElementById('stimulus-mode'),
+        statusDot: document.getElementById('status-dot'), statusTitle: document.getElementById('status-title'),
+        statusDetail: document.getElementById('status-detail'), statusNote: document.getElementById('status-note'), announcement: document.getElementById('sweep-announcement'),
+        probeReadout: document.getElementById('probe-readout'), angleOutput: document.getElementById('angle-output'),
+        setOutput: document.getElementById('set-output'), speedOutput: document.getElementById('speed-output'), orientationOutput: document.getElementById('orientation-output'),
+        frequencyOutput: document.getElementById('frequency-output'), spikeCount: document.getElementById('spike-count'),
+        peakRate: document.getElementById('peak-rate'), heatPeak: document.getElementById('heat-peak'), fitQuality: document.getElementById('fit-quality'),
+        recordingSite: document.getElementById('recording-site'), recordingLocation: document.getElementById('recording-location'),
+        centerOutput: document.getElementById('center-output'), eccentricityOutput: document.getElementById('eccentricity-output'), diameterOutput: document.getElementById('diameter-output'), fieldOutput: document.getElementById('field-output'),
+        stageModeLabel: document.getElementById('stage-mode-label'), stimulusKeyLabel: document.getElementById('stimulus-key-label'), eventsTitle: document.getElementById('events-title'), eventsCaption: document.getElementById('events-caption'), rfCaption: document.getElementById('rf-caption'), mappingMethodCopy: document.getElementById('mapping-method-copy'),
+        retinotopyFigure: document.getElementById('retinotopy-figure'), electrodeHemisphere: document.getElementById('electrode-hemisphere'), electrodeRoute: document.getElementById('electrode-route'), electrodeDetail: document.getElementById('electrode-detail'), electrodeConfidence: document.getElementById('electrode-confidence')
+      };
+      const cortexViews = {};
+      document.querySelectorAll('.cortex-view').forEach(view => { cortexViews[`${view.dataset.hemisphere}-${view.dataset.surface}`] = view; });
+      const contexts = {stimulus: elements.stimulus.getContext('2d'), spikeMap: elements.spikeMap.getContext('2d'), rateMap: elements.rateMap.getContext('2d'), dataFit: elements.dataFit.getContext('2d')};
+      const state = {running: !window.matchMedia('(prefers-reduced-motion: reduce)').matches, speedMultiplier: 1, stimulusMode: 'dots', preferredOrientation: 90, frequencyOctave: 1.125, rfCenterX: 6, rfCenterY: 0, simulationElapsed: 0, currentRate: 0, currentContrast: 0, currentBrightDots: 0, currentDarkDots: 0, currentSetPosition: 0};
+      const gridSize = GRID_COLUMNS * GRID_ROWS;
+      const modeCount = NOISE_MODES.length;
+      const model = {stimulusSeed: 78233, spikeSeed: 314159, probeBag: [], completedSets: 0, currentTrialNumber: -1, currentTrial: null, lastCausalFrame: null, probeHistory: [], filteredDrive: 0, driveScale: 1, rfEnergy: 1, noiseDriveScale: 1, noiseTotalTime: 0, gaussianSpare: null, lastFrameTime: null, lastTrailAt: 0, lastPanelDraw: 0, lastFitAt: -Infinity, fitResult: null, animationFrame: null, dotDrive: new Float32Array(gridSize), trailCanvas: document.createElement('canvas'), spikeCanvas: document.createElement('canvas'), noiseDisplayCanvas: document.createElement('canvas'), trailContext: null, spikeContext: null, noiseDisplayContext: null, noiseDisplayTrial: -1, noiseDisplayGain: 1, brightOccupancy: new Float32Array(gridSize), darkOccupancy: new Float32Array(gridSize), brightSpikeBins: new Float32Array(gridSize), darkSpikeBins: new Float32Array(gridSize), noiseTemporalCos: new Float32Array(modeCount), noiseTemporalSin: new Float32Array(modeCount), noiseProjectionCos: new Float64Array(modeCount), noiseProjectionSin: new Float64Array(modeCount), noiseStimulusCos: new Float64Array(modeCount), noiseStimulusSin: new Float64Array(modeCount), noisePowerCos: new Float64Array(modeCount), noisePowerSin: new Float64Array(modeCount), noiseCrossCos: new Float64Array(modeCount), noiseCrossSin: new Float64Array(modeCount), totalSpikes: 0, peakRate: 0};
+      model.trailCanvas.width = model.spikeCanvas.width = HISTORY_WIDTH;
+      model.trailCanvas.height = model.spikeCanvas.height = HISTORY_HEIGHT;
+      model.trailContext = model.trailCanvas.getContext('2d');
+      model.spikeContext = model.spikeCanvas.getContext('2d');
+      model.noiseDisplayCanvas.width = NOISE_DISPLAY_COLUMNS; model.noiseDisplayCanvas.height = NOISE_DISPLAY_ROWS; model.noiseDisplayContext = model.noiseDisplayCanvas.getContext('2d');
+      {
+        const displayNyquist = Math.min(NOISE_DISPLAY_COLUMNS / (2 * FIELD_WIDTH_DEG),NOISE_DISPLAY_ROWS / (2 * FIELD_HEIGHT_DEG));
+        let visibleVariance = 0;
+        for (const mode of NOISE_MODES) if (mode.frequency <= displayNyquist) visibleVariance += mode.scale ** 2;
+        model.noiseDisplayGain = .34 / Math.sqrt(Math.max(visibleVariance,1e-9));
+      }
+      const spatialFrequency = () => 2 ** state.frequencyOctave;
+      const rfEccentricity = () => Math.acos(clamp(Math.cos(state.rfCenterX * Math.PI / 180) * Math.cos(state.rfCenterY * Math.PI / 180),-1,1)) * 180 / Math.PI;
+      const rfDiameter = () => Math.max(FOVEAL_RF_DIAMETER_DEG,V1_RF_SCALING * rfEccentricity());
+      const sigmaAlong = () => rfDiameter() / (2 * GAUSSIAN_EDGE_Z);
+      const sigmaAcross = () => sigmaAlong() / GABOR_ASPECT_RATIO;
+      const stimulusRandom = () => { model.stimulusSeed = (model.stimulusSeed * 1664525 + 1013904223) >>> 0; return model.stimulusSeed / 4294967296; };
+      const spikeRandom = () => { model.spikeSeed = (model.spikeSeed * 22695477 + 1) >>> 0; return model.spikeSeed / 4294967296; };
+      function gaussianRandom() {
+        if (model.gaussianSpare !== null) { const value = model.gaussianSpare; model.gaussianSpare = null; return value; }
+        let first = 0, second = 0, radius = 0;
+        do { first = stimulusRandom() * 2 - 1; second = stimulusRandom() * 2 - 1; radius = first * first + second * second; } while (radius <= 1e-12 || radius >= 1);
+        const scale = Math.sqrt(-2 * Math.log(radius) / radius); model.gaussianSpare = second * scale; return first * scale;
+      }
+
+      function fitCanvas(canvas, context) {
+        const rect = canvas.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
+        const pixelWidth = Math.max(1, Math.round(rect.width * dpr)), pixelHeight = Math.max(1, Math.round(rect.height * dpr));
+        if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) { canvas.width = pixelWidth; canvas.height = pixelHeight; }
+        context.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return {width: rect.width, height: rect.height};
+      }
+      function fieldTransform(width, height, padding = 0) {
+        const scale = Math.min((width - padding * 2) / FIELD_WIDTH_DEG, (height - padding * 2) / FIELD_HEIGHT_DEG);
+        const fieldWidth = FIELD_WIDTH_DEG * scale, fieldHeight = FIELD_HEIGHT_DEG * scale;
+        return {scale, x: (width - fieldWidth) / 2, y: (height - fieldHeight) / 2, width: fieldWidth, height: fieldHeight,
+          point(xDeg, yDeg) { return {x: (width - fieldWidth) / 2 + (xDeg + FIELD_WIDTH_DEG / 2) * scale, y: (height - fieldHeight) / 2 + (FIELD_HEIGHT_DEG / 2 - yDeg) * scale}; }
+        };
+      }
+      function setRfCenter(x, y) {
+        const nextX = clamp(x,-FIELD_WIDTH_DEG / 2,FIELD_WIDTH_DEG / 2), nextY = clamp(y,-FIELD_HEIGHT_DEG / 2,FIELD_HEIGHT_DEG / 2);
+        if (Math.abs(nextX - state.rfCenterX) < 1e-6 && Math.abs(nextY - state.rfCenterY) < 1e-6) return;
+        state.rfCenterX = nextX; state.rfCenterY = nextY; buildRfModel(); clearMapping(true); updateControls();
+        elements.announcement.textContent = `Receptive field moved to ${signedDegrees(nextX)} azimuth and ${signedDegrees(nextY)} elevation. Eccentricity ${rfEccentricity().toFixed(1)} degrees; diameter ${rfDiameter().toFixed(2)} degrees. Mapping restarted.`;
+        scheduleDraw();
+      }
+      function selectRfFromPointer(event) {
+        const rect = elements.stimulus.getBoundingClientRect(), field = fieldTransform(rect.width,rect.height);
+        const x = clamp(event.clientX - rect.left,field.x,field.x + field.width), y = clamp(event.clientY - rect.top,field.y,field.y + field.height);
+        setRfCenter((x - field.x) / field.scale - FIELD_WIDTH_DEG / 2,FIELD_HEIGHT_DEG / 2 - (y - field.y) / field.scale);
+      }
+      function gridPoint(index) {
+        const column = index % GRID_COLUMNS, row = Math.floor(index / GRID_COLUMNS);
+        return {x: ((column + .5) / GRID_COLUMNS - .5) * FIELD_WIDTH_DEG, y: (.5 - (row + .5) / GRID_ROWS) * FIELD_HEIGHT_DEG};
+      }
+      const frameDurationMs = () => state.stimulusMode === 'noise' ? NOISE_FRAME_DURATION_MS : PROBE_DURATION_MS;
+      const samplesPerPass = () => state.stimulusMode === 'noise' ? NOISE_FRAMES_PER_PASS : PROBES_PER_PASS;
+      function refillProbeBag() {
+        model.probeBag = [];
+        for (let index = 0; index < GRID_COLUMNS * GRID_ROWS; index += 1) model.probeBag.push({index,polarity: 1},{index,polarity: -1});
+        for (let index = model.probeBag.length - 1; index > 0; index -= 1) { const swapIndex = Math.floor(stimulusRandom() * (index + 1)); [model.probeBag[index], model.probeBag[swapIndex]] = [model.probeBag[swapIndex], model.probeBag[index]]; }
+      }
+      function takeProbeFrame() {
+        if (!model.probeBag.length) {
+          if (model.currentTrial !== null) { model.completedSets += 1; elements.announcement.textContent = model.completedSets === TARGET_PASSES ? 'Ten-pass receptive-field estimate complete; mapping continues to refine.' : `Full-screen sparse-noise pass ${model.completedSets} complete.`; }
+          refillProbeBag();
+        }
+        const dots = [], used = new Set();
+        for (let count = 0; count < DOTS_PER_FRAME; count += 1) {
+          let candidate = model.probeBag.length - 1;
+          while (candidate >= 0 && used.has(model.probeBag[candidate].index)) candidate -= 1;
+          if (candidate < 0) candidate = model.probeBag.length - 1;
+          [model.probeBag[candidate], model.probeBag[model.probeBag.length - 1]] = [model.probeBag[model.probeBag.length - 1], model.probeBag[candidate]];
+          const probe = model.probeBag.pop(), point = gridPoint(probe.index); used.add(probe.index); dots.push({...probe,...point});
+        }
+        state.currentSetPosition = PROBES_PER_PASS - model.probeBag.length; return dots;
+      }
+      function takeNoiseFrame(trialNumber) {
+        const completed = Math.floor(trialNumber / NOISE_FRAMES_PER_PASS);
+        if (completed > model.completedSets) elements.announcement.textContent = completed === TARGET_PASSES ? 'Ten contrast cycles complete; the noise-movie receptive-field estimate continues to refine.' : `Contrast-modulated noise cycle ${completed} complete.`;
+        model.completedSets = completed; state.currentSetPosition = trialNumber % NOISE_FRAMES_PER_PASS + 1;
+        const elapsed = trialNumber * NOISE_FRAME_DURATION_MS, contrast = .5 - .5 * Math.cos(2 * Math.PI * elapsed / NOISE_CONTRAST_PERIOD_MS);
+        const temporalCorrelation = Math.exp(-NOISE_FRAME_DURATION_MS / NOISE_TEMPORAL_TAU_MS), innovationScale = Math.sqrt(1 - temporalCorrelation ** 2);
+        const noiseCos = new Float32Array(modeCount), noiseSin = new Float32Array(modeCount);
+        for (let index = 0; index < modeCount; index += 1) {
+          model.noiseTemporalCos[index] = temporalCorrelation * model.noiseTemporalCos[index] + innovationScale * gaussianRandom();
+          model.noiseTemporalSin[index] = temporalCorrelation * model.noiseTemporalSin[index] + innovationScale * gaussianRandom();
+          noiseCos[index] = contrast * NOISE_MODES[index].scale * model.noiseTemporalCos[index];
+          noiseSin[index] = contrast * NOISE_MODES[index].scale * model.noiseTemporalSin[index];
+        }
+        state.currentContrast = contrast; return {noiseCos,noiseSin,contrast};
+      }
+      function gaborWeight(x, y) {
+        const theta = state.preferredOrientation * Math.PI / 180;
+        const along = x * Math.cos(theta) + y * Math.sin(theta), across = -x * Math.sin(theta) + y * Math.cos(theta), frequency = spatialFrequency();
+        const alongSigma = sigmaAlong(), acrossSigma = sigmaAcross();
+        const envelope = Math.exp(-.5 * ((along / alongSigma) ** 2 + (across / acrossSigma) ** 2));
+        const dcBalance = Math.exp(-2 * Math.PI ** 2 * frequency ** 2 * acrossSigma ** 2);
+        return envelope * (Math.cos(2 * Math.PI * frequency * across + GABOR_PHASE) - dcBalance * Math.cos(GABOR_PHASE));
+      }
+      function buildRfModel() {
+        let peak = 1e-9, energy = 0;
+        for (let index = 0; index < model.dotDrive.length; index += 1) { const point = gridPoint(index), weight = gaborWeight(point.x - state.rfCenterX,point.y - state.rfCenterY); model.dotDrive[index] = weight; peak = Math.max(peak,Math.abs(weight)); }
+        for (let index = 0; index < model.dotDrive.length; index += 1) { model.dotDrive[index] /= peak; energy += model.dotDrive[index] ** 2; }
+        const expectedFrameEnergy = energy * DOTS_PER_FRAME / model.dotDrive.length;
+        model.driveScale = clamp(1 / Math.sqrt(Math.max(expectedFrameEnergy,.04)),.35,5); model.rfEnergy = Math.sqrt(Math.max(energy,1e-9));
+        const theta = state.preferredOrientation * Math.PI / 180, cosineTheta = Math.cos(theta), sineTheta = Math.sin(theta), preferredFrequency = spatialFrequency(), alongSigma = sigmaAlong(), acrossSigma = sigmaAcross(), dcBalance = Math.exp(-2 * Math.PI ** 2 * preferredFrequency ** 2 * acrossSigma ** 2), cosinePhase = Math.cos(GABOR_PHASE), sinePhase = Math.sin(GABOR_PHASE); let noiseVariance = 0;
+        for (let index = 0; index < modeCount; index += 1) {
+          const mode = NOISE_MODES[index], alongFrequency = mode.kx * cosineTheta + mode.ky * sineTheta, acrossFrequency = -mode.kx * sineTheta + mode.ky * cosineTheta;
+          const gaussianSpectrum = frequency => 2 * Math.PI * alongSigma * acrossSigma * Math.exp(-2 * Math.PI ** 2 * (alongSigma ** 2 * alongFrequency ** 2 + acrossSigma ** 2 * frequency ** 2));
+          const lowerLobe = gaussianSpectrum(acrossFrequency - preferredFrequency), upperLobe = gaussianSpectrum(acrossFrequency + preferredFrequency), zeroLobe = gaussianSpectrum(acrossFrequency);
+          const localReal = .5 * cosinePhase * (lowerLobe + upperLobe) - dcBalance * cosinePhase * zeroLobe, localImaginary = .5 * sinePhase * (lowerLobe - upperLobe);
+          const centerPhase = 2 * Math.PI * (mode.kx * state.rfCenterX + mode.ky * state.rfCenterY), centerCosine = Math.cos(centerPhase), centerSine = Math.sin(centerPhase);
+          const projectionCosine = localReal * centerCosine + localImaginary * centerSine, projectionSine = localReal * centerSine - localImaginary * centerCosine;
+          model.noiseProjectionCos[index] = projectionCosine; model.noiseProjectionSin[index] = projectionSine;
+          noiseVariance += mode.scale ** 2 * (projectionCosine ** 2 + projectionSine ** 2);
+        }
+        model.noiseDriveScale = noiseVariance > 1e-8 ? Math.min(2500,1 / Math.sqrt(noiseVariance)) : 0;
+      }
+      function clearMapping(changeSeed = false) {
+        if (changeSeed) { model.stimulusSeed = (model.stimulusSeed + 104729) >>> 0; model.spikeSeed = (model.spikeSeed + 130363) >>> 0; }
+        model.probeBag = []; model.completedSets = 0; model.currentTrialNumber = -1; model.currentTrial = null; model.lastCausalFrame = null; model.probeHistory = []; model.filteredDrive = 0; model.noiseTotalTime = 0; model.gaussianSpare = null; model.lastFrameTime = performance.now(); model.lastTrailAt = 0; model.lastPanelDraw = -Infinity; model.lastFitAt = -Infinity; model.fitResult = null; model.noiseDisplayTrial = -1; model.trailContext.clearRect(0,0,HISTORY_WIDTH,HISTORY_HEIGHT); model.spikeContext.clearRect(0,0,HISTORY_WIDTH,HISTORY_HEIGHT); model.brightOccupancy.fill(0); model.darkOccupancy.fill(0); model.brightSpikeBins.fill(0); model.darkSpikeBins.fill(0); model.noiseTemporalCos.fill(0); model.noiseTemporalSin.fill(0); model.noiseStimulusCos.fill(0); model.noiseStimulusSin.fill(0); model.noisePowerCos.fill(0); model.noisePowerSin.fill(0); model.noiseCrossCos.fill(0); model.noiseCrossSin.fill(0); model.totalSpikes = 0; model.peakRate = 0; elements.fitQuality.textContent = 'collecting…'; elements.announcement.textContent = '';
+        state.currentRate = 0; state.currentContrast = 0; state.currentBrightDots = 0; state.currentDarkDots = 0; state.currentSetPosition = 0; state.simulationElapsed = 0; updateLiveUi();
+      }
+      function createTrial(trialNumber) {
+        const duration = frameDurationMs();
+        if (state.stimulusMode === 'noise') model.currentTrial = {trialNumber,...takeNoiseFrame(trialNumber),startTime: trialNumber * duration,endTime: (trialNumber + 1) * duration};
+        else { const dots = takeProbeFrame(); model.currentTrial = {trialNumber,dots,startTime: trialNumber * duration,endTime: (trialNumber + 1) * duration}; state.currentBrightDots = dots.reduce((sum,dot) => sum + (dot.polarity > 0),0); state.currentDarkDots = dots.length - state.currentBrightDots; }
+        model.probeHistory.push(model.currentTrial); while (model.probeHistory.length > 12) model.probeHistory.shift(); updateLiveUi();
+      }
+      function currentBar(elapsed) {
+        const trialNumber = Math.floor(elapsed / frameDurationMs());
+        if (trialNumber !== model.currentTrialNumber) { model.currentTrialNumber = trialNumber; createTrial(trialNumber); }
+        return model.currentTrial;
+      }
+      function stimulusAtTime(elapsed) { for (let index = model.probeHistory.length - 1; index >= 0; index -= 1) { const probe = model.probeHistory[index]; if (elapsed >= probe.startTime && elapsed < probe.endTime) return probe; } return null; }
+      function noiseValueAt(frame, x, y) {
+        let value = 0;
+        for (let index = 0; index < modeCount; index += 1) { const mode = NOISE_MODES[index], phase = 2 * Math.PI * (mode.kx * x + mode.ky * y); value += frame.noiseCos[index] * Math.cos(phase) + frame.noiseSin[index] * Math.sin(phase); }
+        return value;
+      }
+      function evaluateDrive(frame) {
+        let drive = 0;
+        if (state.stimulusMode === 'noise') {
+          for (let index = 0; index < modeCount; index += 1) drive += model.noiseProjectionCos[index] * frame.noiseCos[index] + model.noiseProjectionSin[index] * frame.noiseSin[index];
+          return clamp(drive * model.noiseDriveScale,-1,1);
+        }
+        for (const dot of frame.dots) drive += model.dotDrive[dot.index] * dot.polarity; return clamp(drive * model.driveScale,-1,1);
+      }
+      function historyPoint(x, y) { return {x: (x + FIELD_WIDTH_DEG / 2) / FIELD_WIDTH_DEG * HISTORY_WIDTH, y: (FIELD_HEIGHT_DEG / 2 - y) / FIELD_HEIGHT_DEG * HISTORY_HEIGHT}; }
+      function recordSample(frame, elapsed, deltaTime) {
+        if (!frame || deltaTime <= 0) return;
+        if (state.stimulusMode === 'noise') {
+          const exposure = deltaTime / 1000; model.noiseTotalTime += exposure;
+          for (let index = 0; index < modeCount; index += 1) { const cosine = frame.noiseCos[index], sine = frame.noiseSin[index]; model.noiseStimulusCos[index] += cosine * exposure; model.noiseStimulusSin[index] += sine * exposure; model.noisePowerCos[index] += cosine * cosine * exposure; model.noisePowerSin[index] += sine * sine * exposure; }
+          return;
+        }
+        for (const dot of frame.dots) (dot.polarity > 0 ? model.brightOccupancy : model.darkOccupancy)[dot.index] += deltaTime / 1000;
+        if (elapsed - model.lastTrailAt >= 42) {
+          model.trailContext.fillStyle = 'rgba(55,66,69,.18)';
+          for (const dot of frame.dots) { const point = historyPoint(dot.x,dot.y); model.trailContext.beginPath(); model.trailContext.arc(point.x,point.y,1.15,0,Math.PI * 2); model.trailContext.fill(); }
+          model.lastTrailAt = elapsed;
+        }
+      }
+      function samplePoisson(expectation) {
+        if (expectation <= 0) return 0;
+        const threshold = Math.exp(-expectation); let product = 1, count = 0;
+        do { count += 1; product *= spikeRandom(); } while (product > threshold);
+        return count - 1;
+      }
+      function generateSpikes(causalFrame, deltaTime) {
+        if (deltaTime <= 0) return; const expectation = state.currentRate * deltaTime / 1000;
+        const spikeNumber = samplePoisson(expectation); if (!causalFrame || spikeNumber === 0) return;
+        if (state.stimulusMode === 'noise') {
+          for (let index = 0; index < modeCount; index += 1) { model.noiseCrossCos[index] += causalFrame.noiseCos[index] * spikeNumber; model.noiseCrossSin[index] += causalFrame.noiseSin[index] * spikeNumber; }
+          const markerSteps = 4, markerSpan = Math.max(.5,Math.min(4,rfDiameter() * 1.35)); let location = {x: state.rfCenterX,y: state.rfCenterY}, strongestContribution = -Infinity;
+          for (let row = 0; row <= markerSteps; row += 1) for (let column = 0; column <= markerSteps; column += 1) { const x = clamp(state.rfCenterX + (column / markerSteps - .5) * markerSpan,-FIELD_WIDTH_DEG / 2,FIELD_WIDTH_DEG / 2), y = clamp(state.rfCenterY + (.5 - row / markerSteps) * markerSpan,-FIELD_HEIGHT_DEG / 2,FIELD_HEIGHT_DEG / 2), contribution = gaborWeight(x - state.rfCenterX,y - state.rfCenterY) * noiseValueAt(causalFrame,x,y); if (contribution > strongestContribution) { strongestContribution = contribution; location = {x,y}; } }
+          const point = historyPoint(location.x,location.y); model.totalSpikes += spikeNumber;
+          for (let count = 0; count < spikeNumber; count += 1) { model.spikeContext.fillStyle = 'rgba(255,32,39,.8)'; model.spikeContext.beginPath(); model.spikeContext.arc(point.x,point.y,4.2,0,Math.PI * 2); model.spikeContext.fill(); }
+          return;
+        }
+        let strongestDot = causalFrame.dots[0], strongestContribution = -Infinity;
+        for (const dot of causalFrame.dots) { const contribution = model.dotDrive[dot.index] * dot.polarity; if (contribution > strongestContribution) { strongestContribution = contribution; strongestDot = dot; } }
+        const point = historyPoint(strongestDot.x,strongestDot.y);
+        for (let count = 0; count < spikeNumber; count += 1) {
+          model.totalSpikes += 1;
+          for (const dot of causalFrame.dots) (dot.polarity > 0 ? model.brightSpikeBins : model.darkSpikeBins)[dot.index] += 1;
+          model.spikeContext.fillStyle = 'rgba(255,32,39,.8)'; model.spikeContext.beginPath(); model.spikeContext.arc(point.x,point.y,4.2,0,Math.PI * 2); model.spikeContext.fill();
+        }
+      }
+      function updateModel(frame, elapsed, deltaTime) {
+        const causalFrame = stimulusAtTime(elapsed - CORRELATION_LAG_MS), drive = causalFrame ? evaluateDrive(causalFrame) : 0, filterAmount = 1 - Math.exp(-deltaTime / RESPONSE_TIME_CONSTANT_MS); model.filteredDrive += (drive - model.filteredDrive) * filterAmount;
+        model.lastCausalFrame = causalFrame;
+        state.currentRate = clamp(BASELINE_RATE_HZ + RESPONSE_GAIN_HZ * Math.max(0, model.filteredDrive), .03, MAX_RATE_HZ);
+        recordSample(causalFrame, elapsed, deltaTime); generateSpikes(causalFrame, deltaTime);
+      }
+      function renderNoiseCanvas(frame) {
+        if (!frame || !frame.noiseCos) return model.noiseDisplayCanvas;
+        if (model.noiseDisplayTrial === frame.trialNumber) return model.noiseDisplayCanvas;
+        const values = new Float32Array(NOISE_DISPLAY_COLUMNS * NOISE_DISPLAY_ROWS), displayNyquist = Math.min(NOISE_DISPLAY_COLUMNS / (2 * FIELD_WIDTH_DEG),NOISE_DISPLAY_ROWS / (2 * FIELD_HEIGHT_DEG)), cellWidth = FIELD_WIDTH_DEG / NOISE_DISPLAY_COLUMNS, cellHeight = FIELD_HEIGHT_DEG / NOISE_DISPLAY_ROWS, firstX = -FIELD_WIDTH_DEG / 2 + cellWidth / 2, firstY = FIELD_HEIGHT_DEG / 2 - cellHeight / 2;
+        for (let modeIndex = 0; modeIndex < modeCount; modeIndex += 1) {
+          const mode = NOISE_MODES[modeIndex]; if (mode.frequency > displayNyquist) continue;
+          const stepPhase = 2 * Math.PI * mode.kx * cellWidth, stepCosine = Math.cos(stepPhase), stepSine = Math.sin(stepPhase), cosineCoefficient = frame.noiseCos[modeIndex], sineCoefficient = frame.noiseSin[modeIndex];
+          for (let row = 0; row < NOISE_DISPLAY_ROWS; row += 1) {
+            const y = firstY - row * cellHeight, rowPhase = 2 * Math.PI * (mode.kx * firstX + mode.ky * y); let phaseCosine = Math.cos(rowPhase), phaseSine = Math.sin(rowPhase), offset = row * NOISE_DISPLAY_COLUMNS;
+            for (let column = 0; column < NOISE_DISPLAY_COLUMNS; column += 1) { values[offset + column] += cosineCoefficient * phaseCosine + sineCoefficient * phaseSine; const nextCosine = phaseCosine * stepCosine - phaseSine * stepSine; phaseSine = phaseSine * stepCosine + phaseCosine * stepSine; phaseCosine = nextCosine; }
+          }
+        }
+        const image = model.noiseDisplayContext.createImageData(NOISE_DISPLAY_COLUMNS,NOISE_DISPLAY_ROWS);
+        for (let index = 0; index < values.length; index += 1) { const displayedValue = clamp(values[index] * model.noiseDisplayGain,-1,1), luminance = Math.round(127.5 + displayedValue * 127.5), pixel = index * 4; image.data[pixel] = luminance; image.data[pixel + 1] = luminance; image.data[pixel + 2] = luminance; image.data[pixel + 3] = 255; }
+        model.noiseDisplayContext.putImageData(image,0,0); model.noiseDisplayTrial = frame.trialNumber; return model.noiseDisplayCanvas;
+      }
+      function drawStimulus(frame) {
+        const context = contexts.stimulus, {width, height} = fitCanvas(elements.stimulus, context), field = fieldTransform(width, height); context.fillStyle = '#777'; context.fillRect(0, 0, width, height);
+        if (state.stimulusMode === 'noise') { context.imageSmoothingEnabled = true; context.drawImage(renderNoiseCanvas(frame),field.x,field.y,field.width,field.height); }
+        else { const radius = Math.max(1.3,DOT_DIAMETER_DEG * field.scale / 2); for (const dot of frame.dots) { const center = field.point(dot.x,dot.y); context.fillStyle = dot.polarity > 0 ? '#fff' : '#000'; context.beginPath(); context.arc(center.x,center.y,radius,0,Math.PI * 2); context.fill(); } }
+        const selected = field.point(state.rfCenterX,state.rfCenterY), selectedRadius = Math.max(4,rfDiameter() * field.scale / 2); context.strokeStyle = 'rgba(91,229,211,.95)'; context.fillStyle = '#5be5d3'; context.lineWidth = 1.6; context.setLineDash([4,3]); context.beginPath(); context.arc(selected.x,selected.y,selectedRadius,0,Math.PI * 2); context.stroke(); context.setLineDash([]); context.beginPath(); context.arc(selected.x,selected.y,2.2,0,Math.PI * 2); context.fill();
+        const fixation = field.point(0, 0), arm = clamp(field.scale * .13, 5, 9); context.strokeStyle = 'rgba(255,255,255,.82)'; context.lineWidth = 1.25; context.beginPath(); context.moveTo(fixation.x - arm, fixation.y); context.lineTo(fixation.x + arm, fixation.y); context.moveTo(fixation.x, fixation.y - arm); context.lineTo(fixation.x, fixation.y + arm); context.stroke();
+        context.fillStyle = 'rgba(255,255,255,.72)'; context.font = '650 9px ui-monospace, SFMono-Regular, Menlo, monospace'; context.textBaseline = 'bottom'; context.textAlign = 'left'; context.fillText('−40°',field.x + 7,field.y + field.height - 6); context.textAlign = 'center'; context.fillText('0° fixation',field.x + field.width / 2,field.y + field.height - 6); context.textAlign = 'right'; context.fillText('+40°',field.x + field.width - 7,field.y + field.height - 6);
+      }
+      function drawFieldFrame(context, field, centerX = 0, centerY = 0) { context.strokeStyle = 'rgba(23,33,36,.2)'; context.lineWidth = 1; context.strokeRect(field.x + .5, field.y + .5, field.width - 1, field.height - 1); const center = field.point(centerX, centerY); context.strokeStyle = 'rgba(23,33,36,.42)'; context.beginPath(); context.moveTo(center.x - 4, center.y); context.lineTo(center.x + 4, center.y); context.moveTo(center.x, center.y - 4); context.lineTo(center.x, center.y + 4); context.stroke(); }
+      function drawSpikeMap() {
+        const context = contexts.spikeMap, {width, height} = fitCanvas(elements.spikeMap, context), field = fieldTransform(width, height, 14); context.fillStyle = '#fff'; context.fillRect(0, 0, width, height); context.save(); context.beginPath(); context.rect(field.x, field.y, field.width, field.height); context.clip();
+        if (state.stimulusMode === 'noise' && (model.lastCausalFrame || model.currentTrial)) { context.globalAlpha = .7; context.imageSmoothingEnabled = true; context.drawImage(renderNoiseCanvas(model.lastCausalFrame || model.currentTrial),field.x,field.y,field.width,field.height); }
+        else { context.globalAlpha = SPIKE_TRAIL_OPACITY; context.drawImage(model.trailCanvas,field.x,field.y,field.width,field.height); }
+        context.globalAlpha = 1;
+        context.drawImage(model.spikeCanvas,field.x,field.y,field.width,field.height);
+        context.restore(); drawFieldFrame(context, field);
+      }
+      const HEAT_STOPS = [[0,[22,101,216]],[.25,[112,183,236]],[.5,[119,119,119]],[.75,[243,170,120]],[1,[239,61,40]]];
+      function heatRgb(value) { const normalized = clamp((value + 1) / 2,0,1); for (let index = 1; index < HEAT_STOPS.length; index += 1) if (normalized <= HEAT_STOPS[index][0]) { const previous = HEAT_STOPS[index - 1], next = HEAT_STOPS[index], amount = (normalized - previous[0]) / (next[0] - previous[0]); return previous[1].map((channel,channelIndex) => Math.round(channel + (next[1][channelIndex] - channel) * amount)); } return HEAT_STOPS[HEAT_STOPS.length - 1][1]; }
+      function heatColor(value) { const color = heatRgb(value); return `rgb(${color[0]},${color[1]},${color[2]})`; }
+      function whitenedNoiseRates() {
+        const requestedGrid = Math.ceil(spatialFrequency() * RF_RATE_MAP_SPAN_DEG * NOISE_RF_SAMPLES_PER_CYCLE / 16) * 16, dimension = clamp(requestedGrid,NOISE_RF_MIN_GRID,NOISE_RF_MAX_GRID), localGridSize = dimension * dimension;
+        const rates = new Float32Array(localGridSize), coverage = new Float32Array(localGridSize), cosineWeights = new Float64Array(modeCount), sineWeights = new Float64Array(modeCount), estimate = {rates,coverage,columns: dimension,rows: dimension,centerX: state.rfCenterX,centerY: state.rfCenterY,spanX: RF_RATE_MAP_SPAN_DEG,spanY: RF_RATE_MAP_SPAN_DEG,local: true};
+        if (model.noiseTotalTime <= .02 || model.totalSpikes === 0 || model.noiseDriveScale === 0) return estimate;
+        const meanRate = model.totalSpikes / model.noiseTotalTime, centeredPowers = [];
+        for (let index = 0; index < modeCount; index += 1) { const cosinePower = Math.max(0,model.noisePowerCos[index] - model.noiseStimulusCos[index] ** 2 / model.noiseTotalTime), sinePower = Math.max(0,model.noisePowerSin[index] - model.noiseStimulusSin[index] ** 2 / model.noiseTotalTime); if (cosinePower > 1e-12) centeredPowers.push(cosinePower); if (sinePower > 1e-12) centeredPowers.push(sinePower); }
+        if (!centeredPowers.length) return estimate;
+        centeredPowers.sort((first,second) => first - second); const medianPower = centeredPowers[Math.floor(centeredPowers.length / 2)], ridge = medianPower * (model.totalSpikes < 20 ? .06 : NOISE_WHITENING_RIDGE);
+        // Fourier-domain C⁻¹STA: divide centered spike–stimulus covariance by measured stimulus power.
+        const reconstructionCutoff = clamp(spatialFrequency() * 1.4,1.25,NOISE_SPATIAL_CUTOFF_CPD), responseNormalization = .5 * model.noiseDriveScale;
+        for (let index = 0; index < modeCount; index += 1) {
+          const cosinePower = Math.max(0,model.noisePowerCos[index] - model.noiseStimulusCos[index] ** 2 / model.noiseTotalTime), sinePower = Math.max(0,model.noisePowerSin[index] - model.noiseStimulusSin[index] ** 2 / model.noiseTotalTime);
+          const centeredCosineCross = model.noiseCrossCos[index] - meanRate * model.noiseStimulusCos[index], centeredSineCross = model.noiseCrossSin[index] - meanRate * model.noiseStimulusSin[index];
+          const spectralTaper = Math.exp(-((NOISE_MODES[index].frequency / reconstructionCutoff) ** 4));
+          if (spectralTaper < 1e-4) continue;
+          cosineWeights[index] = spectralTaper * NOISE_MODES[index].quadrature * centeredCosineCross / ((cosinePower + ridge) * responseNormalization); sineWeights[index] = spectralTaper * NOISE_MODES[index].quadrature * centeredSineCross / ((sinePower + ridge) * responseNormalization);
+        }
+        const cellWidth = RF_RATE_MAP_SPAN_DEG / dimension, cellHeight = RF_RATE_MAP_SPAN_DEG / dimension, firstX = state.rfCenterX - RF_RATE_MAP_SPAN_DEG / 2 + cellWidth / 2, firstY = state.rfCenterY + RF_RATE_MAP_SPAN_DEG / 2 - cellHeight / 2;
+        for (let modeIndex = 0; modeIndex < modeCount; modeIndex += 1) {
+          const cosineWeight = cosineWeights[modeIndex], sineWeight = sineWeights[modeIndex]; if (cosineWeight === 0 && sineWeight === 0) continue;
+          const mode = NOISE_MODES[modeIndex], stepPhase = 2 * Math.PI * mode.kx * cellWidth, stepCosine = Math.cos(stepPhase), stepSine = Math.sin(stepPhase);
+          for (let row = 0; row < dimension; row += 1) {
+            const y = firstY - row * cellHeight, rowPhase = 2 * Math.PI * (mode.kx * firstX + mode.ky * y); let phaseCosine = Math.cos(rowPhase), phaseSine = Math.sin(rowPhase), offset = row * dimension;
+            for (let column = 0; column < dimension; column += 1) { rates[offset] += cosineWeight * phaseCosine + sineWeight * phaseSine; const nextCosine = phaseCosine * stepCosine - phaseSine * stepSine; phaseSine = phaseSine * stepCosine + phaseCosine * stepSine; phaseCosine = nextCosine; offset += 1; }
+          }
+        }
+        for (let row = 0; row < dimension; row += 1) for (let column = 0; column < dimension; column += 1) { const x = firstX + column * cellWidth, y = firstY - row * cellHeight; if (Math.abs(x) <= FIELD_WIDTH_DEG / 2 && Math.abs(y) <= FIELD_HEIGHT_DEG / 2) coverage[row * dimension + column] = model.noiseTotalTime; }
+        return estimate;
+      }
+      function smoothedRates() {
+        if (state.stimulusMode === 'noise') { const estimate = whitenedNoiseRates(); let peak = 0; for (const rate of estimate.rates) peak = Math.max(peak,Math.abs(rate)); model.peakRate = peak; return estimate; }
+        const rates = new Float32Array(GRID_COLUMNS * GRID_ROWS), coverage = new Float32Array(GRID_COLUMNS * GRID_ROWS), cellX = FIELD_WIDTH_DEG / GRID_COLUMNS, cellY = FIELD_HEIGHT_DEG / GRID_ROWS, smoothingSigma = Math.min(.3,1 / (8 * spatialFrequency())), kernel = [];
+        for (let offsetY = -1; offsetY <= 1; offsetY += 1) for (let offsetX = -1; offsetX <= 1; offsetX += 1) { const distanceSquared = (offsetX * cellX) ** 2 + (offsetY * cellY) ** 2, weight = Math.exp(-.5 * distanceSquared / smoothingSigma ** 2); if (weight > .001) kernel.push({offsetX,offsetY,weight}); }
+        let peak = 0;
+        for (let row = 0; row < GRID_ROWS; row += 1) for (let column = 0; column < GRID_COLUMNS; column += 1) { let brightSpikes = 0, darkSpikes = 0, brightTime = 0, darkTime = 0;
+          for (const sample of kernel) { const neighborRow = row + sample.offsetY, neighborColumn = column + sample.offsetX; if (neighborRow < 0 || neighborRow >= GRID_ROWS || neighborColumn < 0 || neighborColumn >= GRID_COLUMNS) continue; const index = neighborRow * GRID_COLUMNS + neighborColumn; brightSpikes += model.brightSpikeBins[index] * sample.weight; darkSpikes += model.darkSpikeBins[index] * sample.weight; brightTime += model.brightOccupancy[index] * sample.weight; darkTime += model.darkOccupancy[index] * sample.weight; }
+          const index = row * GRID_COLUMNS + column, covered = Math.min(brightTime,darkTime), rate = covered > .02 ? brightSpikes / brightTime - darkSpikes / darkTime : 0; rates[index] = rate; coverage[index] = covered; peak = Math.max(peak, Math.abs(rate));
+        } model.peakRate = peak; return {rates,coverage,columns: GRID_COLUMNS,rows: GRID_ROWS,centerX: 0,centerY: 0,spanX: FIELD_WIDTH_DEG,spanY: FIELD_HEIGHT_DEG,local: false};
+      }
+      function measuredPoint(measured,index) {
+        if (!measured.local) return gridPoint(index);
+        const column = index % measured.columns, row = Math.floor(index / measured.columns);
+        return {x: measured.centerX + ((column + .5) / measured.columns - .5) * measured.spanX,y: measured.centerY + (.5 - (row + .5) / measured.rows) * measured.spanY};
+      }
+      function bilinearMeasuredSample(measured, values, x, y) {
+        const gridX = ((x - measured.centerX) / measured.spanX + .5) * measured.columns - .5, gridY = (.5 - (y - measured.centerY) / measured.spanY) * measured.rows - .5;
+        if (gridX < 0 || gridX > measured.columns - 1 || gridY < 0 || gridY > measured.rows - 1) return null;
+        const x0 = Math.floor(gridX), y0 = Math.floor(gridY), x1 = Math.min(measured.columns - 1,x0 + 1), y1 = Math.min(measured.rows - 1,y0 + 1), amountX = gridX - x0, amountY = gridY - y0;
+        const top = values[y0 * measured.columns + x0] * (1 - amountX) + values[y0 * measured.columns + x1] * amountX;
+        const bottom = values[y1 * measured.columns + x0] * (1 - amountX) + values[y1 * measured.columns + x1] * amountX;
+        return top * (1 - amountY) + bottom * amountY;
+      }
+      function drawRateMap() {
+        const context = contexts.rateMap, {width, height} = fitCanvas(elements.rateMap, context), smoothed = smoothedRates();
+        context.fillStyle = '#fff'; context.fillRect(0, 0, width, height);
+        const size = Math.max(70,Math.min(width - 34,height - 58)), mapX = (width - size) / 2, mapY = 28, halfSpan = RF_RATE_MAP_SPAN_DEG / 2;
+        let localPeak = 0;
+        for (let index = 0; index < smoothed.rates.length; index += 1) {
+          const point = measuredPoint(smoothed,index);
+          if (Math.abs(point.x - state.rfCenterX) <= halfSpan && Math.abs(point.y - state.rfCenterY) <= halfSpan && smoothed.coverage[index] > .02) localPeak = Math.max(localPeak,Math.abs(smoothed.rates[index]));
+        }
+        model.peakRate = localPeak;
+        const displayPeak = Math.max(1,localPeak), resolution = Math.max(96,Math.min(560,Math.round(size)));
+        const scratch = document.createElement('canvas'); scratch.width = resolution; scratch.height = resolution;
+        const scratchContext = scratch.getContext('2d'), pixels = scratchContext.createImageData(resolution,resolution), neutral = heatRgb(0);
+        for (let row = 0; row < resolution; row += 1) for (let column = 0; column < resolution; column += 1) {
+          const x = state.rfCenterX + ((column + .5) / resolution - .5) * RF_RATE_MAP_SPAN_DEG, y = state.rfCenterY + (.5 - (row + .5) / resolution) * RF_RATE_MAP_SPAN_DEG;
+          const rate = bilinearMeasuredSample(smoothed,smoothed.rates,x,y), coverage = bilinearMeasuredSample(smoothed,smoothed.coverage,x,y);
+          const rawMagnitude = rate !== null ? clamp(Math.abs(rate) / displayPeak,0,1) : 0, visibleMagnitude = clamp((rawMagnitude - RF_RATE_MAP_COLOR_FLOOR) / (1 - RF_RATE_MAP_COLOR_FLOOR),0,1);
+          const normalized = rate !== null && coverage !== null && coverage > .02 ? Math.sign(rate) * visibleMagnitude : 0;
+          const color = rate === null ? neutral : heatRgb(normalized), offset = (row * resolution + column) * 4;
+          pixels.data[offset] = color[0]; pixels.data[offset + 1] = color[1]; pixels.data[offset + 2] = color[2]; pixels.data[offset + 3] = 255;
+        }
+        scratchContext.putImageData(pixels,0,0); context.imageSmoothingEnabled = true; context.drawImage(scratch,mapX,mapY,size,size);
+        context.strokeStyle = 'rgba(23,33,36,.2)'; context.lineWidth = 1; context.strokeRect(mapX + .5,mapY + .5,size - 1,size - 1);
+        const centerX = mapX + size / 2, centerY = mapY + size / 2;
+        context.strokeStyle = 'rgba(23,33,36,.52)'; context.beginPath(); context.moveTo(centerX - 5,centerY); context.lineTo(centerX + 5,centerY); context.moveTo(centerX,centerY - 5); context.lineTo(centerX,centerY + 5); context.stroke();
+        context.fillStyle = '#637073'; context.font = '600 7px ui-monospace, SFMono-Regular, Menlo, monospace'; context.textBaseline = 'top'; context.textAlign = 'left'; context.fillText('−4.0°',mapX,mapY + size + 5); context.textAlign = 'center'; context.fillText('8° × 8°',centerX,mapY + size + 5); context.textAlign = 'right'; context.fillText('+4.0°',mapX + size,mapY + size + 5);
+        return smoothed;
+      }
+      function fitMeasuredGabor(measured) {
+        const span = Math.max(1.5,rfDiameter() * 2.7), halfSpan = span / 2, cellX = measured.spanX / measured.columns, cellY = measured.spanY / measured.rows, sampleStep = measured.local ? Math.max(1,Math.ceil(Math.max(measured.columns,measured.rows) / 80)) : 1, samples = [];
+        let maximumCoverage = 0;
+        for (let row = 0; row < measured.rows; row += sampleStep) for (let column = 0; column < measured.columns; column += sampleStep) {
+          const index = row * measured.columns + column, point = measuredPoint(measured,index), coverage = measured.coverage[index], value = measured.rates[index];
+          if (Math.abs(point.x - state.rfCenterX) > halfSpan || Math.abs(point.y - state.rfCenterY) > halfSpan || coverage <= .02 || !Number.isFinite(value)) continue;
+          samples.push({x: point.x,y: point.y,value,coverage}); maximumCoverage = Math.max(maximumCoverage,coverage);
+        }
+        if (samples.length < 16 || model.totalSpikes < 12) return null;
+        let sumWeight = 0, sumValue = 0;
+        for (const sample of samples) { sample.weight = clamp(sample.coverage / Math.max(.04,maximumCoverage),.12,1); sumWeight += sample.weight; sumValue += sample.value * sample.weight; }
+        const mean = sumValue / sumWeight;
+        let totalVariance = 0, peak = 0;
+        for (const sample of samples) { const centered = sample.value - mean; totalVariance += sample.weight * centered ** 2; peak = Math.max(peak,Math.abs(centered)); }
+        if (totalVariance < 1e-6 || peak < 1e-6) return null;
+        const energyFloor = peak * .18;
+        let energySum = 0, centerX = 0, centerY = 0;
+        for (const sample of samples) { const energy = Math.max(0,Math.abs(sample.value - mean) - energyFloor) ** 2 * sample.weight; energySum += energy; centerX += sample.x * energy; centerY += sample.y * energy; }
+        if (energySum < 1e-6) return null;
+        centerX /= energySum; centerY /= energySum;
+        const centerLimit = Math.min(halfSpan * .3,rfDiameter() * .42);
+        centerX = clamp(centerX,state.rfCenterX - centerLimit,state.rfCenterX + centerLimit); centerY = clamp(centerY,state.rfCenterY - centerLimit,state.rfCenterY + centerLimit);
+        let covarianceXX = 0, covarianceYY = 0, covarianceXY = 0;
+        for (const sample of samples) { const energy = Math.max(0,Math.abs(sample.value - mean) - energyFloor) ** 2 * sample.weight, x = sample.x - centerX, y = sample.y - centerY; covarianceXX += energy * x * x; covarianceYY += energy * y * y; covarianceXY += energy * x * y; }
+        covarianceXX /= energySum; covarianceYY /= energySum; covarianceXY /= energySum;
+        let best = null;
+        const evaluateCandidate = (orientation,frequency) => {
+          const normalizedOrientation = (orientation % 180 + 180) % 180, theta = normalizedOrientation * Math.PI / 180, cosine = Math.cos(theta), sine = Math.sin(theta);
+          const varianceAlong = Math.max(0,cosine ** 2 * covarianceXX + 2 * cosine * sine * covarianceXY + sine ** 2 * covarianceYY), varianceAcross = Math.max(0,sine ** 2 * covarianceXX - 2 * cosine * sine * covarianceXY + cosine ** 2 * covarianceYY);
+          const resolutionFloor = Math.min(cellX,cellY) * .5, expectedSigmaAlong = sigmaAlong(), expectedSigmaAcross = sigmaAcross(), sigmaAlongMinimum = Math.min(Math.max(resolutionFloor,expectedSigmaAlong * .8),Math.max(resolutionFloor,expectedSigmaAlong * 1.1)), sigmaAcrossMinimum = Math.min(Math.max(resolutionFloor,expectedSigmaAcross * .8),Math.max(resolutionFloor,expectedSigmaAcross * 1.1));
+          const sigmaAlongFit = clamp(Math.sqrt(2 * varianceAlong),sigmaAlongMinimum,Math.max(resolutionFloor,expectedSigmaAlong * 1.1)), sigmaAcrossFit = clamp(Math.sqrt(2 * varianceAcross),sigmaAcrossMinimum,Math.max(resolutionFloor,expectedSigmaAcross * 1.1));
+          let sumC = 0, sumS = 0, sumCC = 0, sumSS = 0, sumCS = 0, sumYC = 0, sumYS = 0;
+          for (const sample of samples) { const x = sample.x - centerX, y = sample.y - centerY, along = x * cosine + y * sine, across = -x * sine + y * cosine, envelope = Math.exp(-.5 * ((along / sigmaAlongFit) ** 2 + (across / sigmaAcrossFit) ** 2)), phase = 2 * Math.PI * frequency * across, c = envelope * Math.cos(phase), s = envelope * Math.sin(phase), weight = sample.weight; sumC += weight * c; sumS += weight * s; sumCC += weight * c * c; sumSS += weight * s * s; sumCS += weight * c * s; sumYC += weight * sample.value * c; sumYS += weight * sample.value * s; }
+          const centeredCC = sumCC - sumC ** 2 / sumWeight, centeredSS = sumSS - sumS ** 2 / sumWeight, centeredCS = sumCS - sumC * sumS / sumWeight, centeredYC = sumYC - sumValue * sumC / sumWeight, centeredYS = sumYS - sumValue * sumS / sumWeight, determinant = centeredCC * centeredSS - centeredCS ** 2;
+          if (Math.abs(determinant) < 1e-8) return null;
+          const cosineGain = (centeredYC * centeredSS - centeredYS * centeredCS) / determinant, sineGain = (centeredYS * centeredCC - centeredYC * centeredCS) / determinant, offset = (sumValue - cosineGain * sumC - sineGain * sumS) / sumWeight;
+          let error = 0;
+          for (const sample of samples) { const x = sample.x - centerX, y = sample.y - centerY, along = x * cosine + y * sine, across = -x * sine + y * cosine, envelope = Math.exp(-.5 * ((along / sigmaAlongFit) ** 2 + (across / sigmaAcrossFit) ** 2)), phase = 2 * Math.PI * frequency * across, prediction = offset + envelope * (cosineGain * Math.cos(phase) + sineGain * Math.sin(phase)); error += sample.weight * (sample.value - prediction) ** 2; }
+          return {centerX,centerY,orientation: normalizedOrientation,frequency,sigmaAlong: sigmaAlongFit,sigmaAcross: sigmaAcrossFit,cosineGain,sineGain,offset,rSquared: 1 - error / totalVariance,span,sampleCount: samples.length};
+        };
+        const maximumFrequency = .49 / Math.max(cellX,cellY), minimumFrequency = state.stimulusMode === 'noise' ? Math.max(.3,spatialFrequency() * .55) : .3, frequencyStep = state.stimulusMode === 'noise' ? Math.max(.1,spatialFrequency() / 24) : .1;
+        for (let orientation = 0; orientation < 180; orientation += 5) for (let frequency = minimumFrequency; frequency <= maximumFrequency + .001; frequency += frequencyStep) { const candidate = evaluateCandidate(orientation,frequency); if (candidate && (!best || candidate.rSquared > best.rSquared)) best = candidate; }
+        if (!best) return null;
+        const coarseOrientation = best.orientation, coarseFrequency = best.frequency;
+        for (let orientation = coarseOrientation - 4; orientation <= coarseOrientation + 4; orientation += 1) for (let frequency = Math.max(minimumFrequency,coarseFrequency - frequencyStep); frequency <= Math.min(maximumFrequency,coarseFrequency + frequencyStep) + .001; frequency += Math.max(.02,frequencyStep / 5)) { const candidate = evaluateCandidate(orientation,frequency); if (candidate && candidate.rSquared > best.rSquared) best = candidate; }
+        best.rSquared = clamp(best.rSquared,0,1); best.phase = Math.atan2(best.sineGain,best.cosineGain); return best;
+      }
+      function fittedValue(fit,x,y) { const theta = fit.orientation * Math.PI / 180, along = x * Math.cos(theta) + y * Math.sin(theta), across = -x * Math.sin(theta) + y * Math.cos(theta), envelope = Math.exp(-.5 * ((along / fit.sigmaAlong) ** 2 + (across / fit.sigmaAcross) ** 2)), phase = 2 * Math.PI * fit.frequency * across; return envelope * (fit.cosineGain * Math.cos(phase) + fit.sineGain * Math.sin(phase)); }
+      function drawDataFit(measured, now) {
+        if (!model.fitResult || now - model.lastFitAt >= 450) { model.fitResult = fitMeasuredGabor(measured); model.lastFitAt = now; }
+        const context = contexts.dataFit, {width, height} = fitCanvas(elements.dataFit, context); context.fillStyle = '#fff'; context.fillRect(0,0,width,height);
+        const fit = model.fitResult, minimumRevealPasses = 4, mappedPasses = model.completedSets + state.currentSetPosition / samplesPerPass(), mappingProgress = clamp(mappedPasses / TARGET_PASSES,0,1), size = Math.max(70,Math.min(width - 34,height - 58)), mapX = (width - size) / 2, mapY = 28;
+        if (!fit || mappedPasses < minimumRevealPasses || fit.rSquared < .12) { elements.fitQuality.textContent = mappedPasses < minimumRevealPasses ? `waiting ${Math.min(mappedPasses,minimumRevealPasses).toFixed(1)}/${minimumRevealPasses}` : 'fit stabilizing'; context.fillStyle = '#777'; context.fillRect(mapX,mapY,size,size); context.strokeStyle = 'rgba(23,33,36,.2)'; context.strokeRect(mapX + .5,mapY + .5,size - 1,size - 1); context.fillStyle = 'rgba(255,255,255,.82)'; context.font = '650 10px ui-monospace, SFMono-Regular, Menlo, monospace'; context.textAlign = 'center'; context.textBaseline = 'middle'; context.fillText(`Waiting for ${minimumRevealPasses} mapping passes`,width / 2,mapY + size / 2 - 7); context.font = '500 9px ui-monospace, SFMono-Regular, Menlo, monospace'; context.fillText(`${Math.round(mappingProgress * 100)}% of target data collected`,width / 2,mapY + size / 2 + 12); return; }
+        elements.fitQuality.textContent = `R² ${fit.rSquared.toFixed(2)}`;
+        const resolution = Math.max(70,Math.round(size)), image = context.createImageData(resolution,resolution), values = new Float32Array(resolution * resolution), displaySpan = Math.max(1.5,fit.span * FIT_VIEW_SCALE); let maximum = 1e-9;
+        for (let row = 0; row < resolution; row += 1) for (let column = 0; column < resolution; column += 1) { const x = (column / (resolution - 1) - .5) * displaySpan, y = (.5 - row / (resolution - 1)) * displaySpan, value = fittedValue(fit,x,y); values[row * resolution + column] = value; maximum = Math.max(maximum,Math.abs(value)); }
+        const emergence = clamp((mappedPasses - minimumRevealPasses) / (TARGET_PASSES - minimumRevealPasses),0,1), colorFloor = maximum * COLOR_DEAD_ZONE, colorSpan = Math.max(1e-9,maximum - colorFloor);
+        for (let index = 0; index < values.length; index += 1) { const value = values[index], colorPosition = clamp((Math.abs(value) - colorFloor) / colorSpan,0,1), colorStrength = colorPosition ** COLOR_RESPONSE_GAMMA, displayedValue = Math.sign(value) * colorStrength * emergence, color = heatRgb(displayedValue), pixel = index * 4; image.data[pixel] = color[0]; image.data[pixel + 1] = color[1]; image.data[pixel + 2] = color[2]; image.data[pixel + 3] = 255; }
+        const scratch = document.createElement('canvas'); scratch.width = resolution; scratch.height = resolution; scratch.getContext('2d').putImageData(image,0,0); context.imageSmoothingEnabled = true; context.drawImage(scratch,mapX,mapY,size,size); context.strokeStyle = 'rgba(23,33,36,.2)'; context.lineWidth = 1; context.strokeRect(mapX + .5,mapY + .5,size - 1,size - 1);
+        const theta = fit.orientation * Math.PI / 180, scale = size / displaySpan, centerX = mapX + size / 2, centerY = mapY + size / 2; context.strokeStyle = `rgba(23,33,36,${(.1 + .45 * emergence).toFixed(2)})`; context.setLineDash([4,3]); context.beginPath(); context.ellipse(centerX,centerY,fit.sigmaAlong * GAUSSIAN_EDGE_Z * scale,fit.sigmaAcross * GAUSSIAN_EDGE_Z * scale,-theta,0,Math.PI * 2); context.stroke(); context.setLineDash([]); context.strokeStyle = `rgba(23,33,36,${(.2 + .65 * emergence).toFixed(2)})`; context.lineWidth = 1.2; context.beginPath(); context.moveTo(centerX - 5,centerY); context.lineTo(centerX + 5,centerY); context.moveTo(centerX,centerY - 5); context.lineTo(centerX,centerY + 5); context.stroke();
+        const phaseDegrees = ((fit.phase * 180 / Math.PI) % 360 + 360) % 360; context.fillStyle = '#172124'; context.font = '700 8px ui-monospace, SFMono-Regular, Menlo, monospace'; context.textBaseline = 'alphabetic'; context.textAlign = 'left'; context.fillText(`fit θ ${fit.orientation.toFixed(0)}° · ${fit.frequency.toFixed(2)} c/° · φ ${phaseDegrees.toFixed(0)}°`,mapX,11); context.fillStyle = '#637073'; context.font = '600 7px ui-monospace, SFMono-Regular, Menlo, monospace'; context.fillText(`center ${signedDegrees(fit.centerX)}, ${signedDegrees(fit.centerY)} · σ⊥ ${fit.sigmaAcross.toFixed(2)}° · σ∥ ${fit.sigmaAlong.toFixed(2)}°`,mapX,22);
+        const halfSpan = displaySpan / 2; context.fillStyle = '#637073'; context.textBaseline = 'top'; context.textAlign = 'left'; context.fillText(`−${halfSpan.toFixed(1)}°`,mapX,mapY + size + 5); context.textAlign = 'center'; context.fillText(`0° · ${Math.round(mappingProgress * 100)}% mapped`,centerX,mapY + size + 5); context.textAlign = 'right'; context.fillText(`+${halfSpan.toFixed(1)}°`,mapX + size,mapY + size + 5);
+      }
+      const signedDegrees = value => `${value > .049 ? '+' : value < -.049 ? '−' : ''}${Math.abs(value).toFixed(1)}°`;
+      function interpolateRetinotopyEccentricity(eccentricity) {
+        const anchors = [[0,.08],[2.5,.45],[6,.68],[8,.94]], limited = clamp(eccentricity,0,8);
+        for (let index = 1; index < anchors.length; index += 1) if (limited <= anchors[index][0]) { const previous = anchors[index - 1], next = anchors[index], amount = (limited - previous[0]) / (next[0] - previous[0]); return previous[1] + (next[1] - previous[1]) * amount; }
+        return anchors[anchors.length - 1][1];
+      }
+      function electrodeMarkerPosition(hemisphere,surface,eccentricity,polarAngle) {
+        const verticalPosition = Math.sin(polarAngle * Math.PI / 180), lateralPosition = surface === 'lateral' ? interpolateRetinotopyEccentricity(eccentricity) : .35 + .35 * clamp((eccentricity - 8) / 2,0,1), localX = hemisphere === 'left' ? lateralPosition : 1 - lateralPosition, localY = surface === 'lateral' ? .52 + .23 * verticalPosition : .54 + .4 * verticalPosition;
+        return {x: clamp(localX,.06,.94) * 100,y: clamp(localY,.08,.92) * 100};
+      }
+      function placeElectrodeMarker(hemisphere,surface,eccentricity,polarAngle,secondary = false) {
+        const view = cortexViews[`${hemisphere}-${surface}`], marker = view.querySelector('.electrode-marker'), position = electrodeMarkerPosition(hemisphere,surface,eccentricity,polarAngle), color = hemisphere === 'left' ? '#39d984' : '#ffd84d';
+        view.classList.add('active'); view.style.setProperty('--site-color',color); view.setAttribute('aria-current','true'); marker.hidden = false; marker.classList.toggle('secondary',secondary); marker.style.setProperty('--marker-x',`${position.x.toFixed(2)}%`); marker.style.setProperty('--marker-y',`${position.y.toFixed(2)}%`); marker.style.setProperty('--marker-color',color);
+      }
+      function updateElectrodePanel(eccentricity) {
+        const foveal = eccentricity < .25, meridianBoundary = Math.abs(state.rfCenterX) < .25, hemisphere = state.rfCenterX < 0 ? 'right' : 'left', oppositeHemisphere = hemisphere === 'left' ? 'right' : 'left', surface = eccentricity <= 8 ? 'lateral' : 'medial', polarAngle = eccentricity > .001 ? Math.atan2(state.rfCenterY,Math.abs(state.rfCenterX)) * 180 / Math.PI : 0, fieldLabel = foveal ? 'Fixation / fovea' : meridianBoundary ? 'Vertical meridian' : state.rfCenterX > 0 ? 'Right visual field' : 'Left visual field', hemisphereLabel = foveal ? 'bilateral foveal confluence' : meridianBoundary ? 'bilateral V1/V2 boundary' : `${hemisphere} V1`, surfaceLabel = eccentricity < 1 ? 'foveal confluence' : eccentricity < 7 ? 'lateral operculum' : eccentricity <= 8 ? 'opercular hinge (~7–8°)' : eccentricity <= 10 ? 'medial rCaS' : 'medial V1 · map-edge estimate', angleLabel = foveal ? 'central representation' : Math.abs(polarAngle) < 9 ? 'horizontal-meridian band' : polarAngle > 0 ? 'ventral V1 · upper field' : 'dorsal V1 · lower field';
+        Object.values(cortexViews).forEach(view => { const marker = view.querySelector('.electrode-marker'); view.classList.remove('active'); view.removeAttribute('aria-current'); marker.hidden = true; marker.classList.remove('secondary'); });
+        placeElectrodeMarker(hemisphere,surface,eccentricity,polarAngle);
+        if (meridianBoundary) placeElectrodeMarker(oppositeHemisphere,surface,eccentricity,polarAngle,true);
+        elements.electrodeHemisphere.textContent = meridianBoundary ? 'L + R V1' : `${hemisphere[0].toUpperCase() + hemisphere.slice(1)} V1`;
+        elements.electrodeRoute.textContent = `${fieldLabel} → ${hemisphereLabel}`; elements.electrodeDetail.textContent = `${surfaceLabel} · ${angleLabel} · ${eccentricity.toFixed(1)}°`;
+        elements.electrodeConfidence.textContent = eccentricity <= 10 ? meridianBoundary ? 'Figure 5 range · boundary estimate' : 'Within Figure 5 mapped range' : 'Beyond 10° · marker clamped to map edge'; elements.electrodeConfidence.classList.toggle('extrapolated',eccentricity > 10 || meridianBoundary);
+        elements.retinotopyFigure.setAttribute('aria-label',`Figure 5 macaque V1 surface views. Estimated ${fieldLabel.toLowerCase()} target is ${hemisphereLabel}, ${surfaceLabel}, ${angleLabel}, at ${eccentricity.toFixed(1)} degrees eccentricity.${eccentricity > 10 ? ' This is beyond the directly mapped range.' : ''}`);
+      }
+      function updateControls() { const frequency = spatialFrequency(), eccentricity = rfEccentricity(), diameter = rfDiameter(), center = `${signedDegrees(state.rfCenterX)}, ${signedDegrees(state.rfCenterY)}`; elements.orientationOutput.textContent = `${state.preferredOrientation}°`; elements.frequencyOutput.textContent = `${frequency.toFixed(1)} c/°`; elements.orientationInput.setAttribute('aria-valuetext',`${state.preferredOrientation} degrees; zero is horizontal and ninety is vertical`); elements.frequencyInput.setAttribute('aria-valuetext',`${frequency.toFixed(1)} cycles per degree`); elements.recordingSite.textContent = `V1 · ${eccentricity.toFixed(1)}°`; elements.recordingLocation.textContent = `center ${center}`; elements.centerOutput.textContent = center; elements.eccentricityOutput.textContent = `${eccentricity.toFixed(1)}°`; elements.diameterOutput.textContent = `${diameter.toFixed(2)}°`; elements.fieldOutput.textContent = `${FIELD_WIDTH_DEG}° × ${FIELD_HEIGHT_DEG.toFixed(0)}°`; updateElectrodePanel(eccentricity); }
+      function updateRunningUi() { elements.statusDot.classList.toggle('live',state.running); elements.statusTitle.textContent = state.running ? 'Mapping in progress' : 'Mapping paused'; elements.playButton.textContent = state.running ? 'Pause mapping' : 'Resume mapping'; }
+      function updateStimulusModeUi() {
+        const noiseMode = state.stimulusMode === 'noise'; elements.stimulusModeButton.setAttribute('aria-pressed',String(noiseMode)); elements.stimulusModeButton.textContent = noiseMode ? 'Contrast noise: on' : 'Contrast noise: off'; elements.stageModeLabel.textContent = noiseMode ? 'Contrast-modulated 1/f noise movie · click to place RF' : 'Stimulus screen · click to place RF'; elements.stimulusKeyLabel.textContent = noiseMode ? '1/f Gaussian luminance noise' : 'bright / dark dots'; elements.statusNote.textContent = noiseMode ? '30 fps · 1/f spatial power · 4 Hz temporal LP · 60 ms lag' : '280 dots/frame · 20 ms · 60 ms lag'; elements.eventsTitle.textContent = noiseMode ? 'Spike-triggered pink-noise frames' : 'Spike-triggered dot frames'; elements.eventsCaption.textContent = noiseMode ? 'Gray shows the low-pass preview of the 60 ms pre-spike 1/f frame; red marks its strongest positive RF contribution.' : 'Gray shows sampled locations; red marks the strongest positive sample 60 ms before each spike.'; elements.rfCaption.textContent = noiseMode ? 'Fixed 8° × 8° window. Regularized Fourier-whitened movie STA: blue OFF, red ON, gray zero.' : 'Fixed 8° × 8° RF-centered window; the spatial scale does not change. Blue OFF, red ON, gray zero.'; elements.mappingMethodCopy.textContent = noiseMode ? 'The estimator looks backward by 60 ms, subtracts finite-record baseline leakage, and divides each Fourier component by its measured stimulus power to reveal the signed first-order RF.' : 'The estimator looks backward from every spike by 60 ms. Bright- and dark-triggered response rates are subtracted to reveal signed ON and OFF subregions.'; elements.stimulus.setAttribute('aria-label',noiseMode ? 'Click or use the arrow keys to position the receptive-field center while a contrast-modulated one-over-f Gaussian noise movie fills the tangent screen' : 'Click or use the arrow keys to position the receptive-field center while bright and dark dot probes flash across the tangent screen');
+      }
+      function updateLiveUi() {
+        const hasFrame = model.currentTrial !== null, noiseMode = state.stimulusMode === 'noise', totalSamples = samplesPerPass(), contrast = Math.round(state.currentContrast * 100), frameText = hasFrame ? noiseMode ? `${contrast}% C` : `${state.currentBrightDots}+ / ${state.currentDarkDots}−` : '—', pass = hasFrame ? model.completedSets + 1 : 0, passLabel = pass > TARGET_PASSES ? `${pass} · target met` : `${pass}/${TARGET_PASSES}`;
+        elements.angleOutput.textContent = frameText; elements.setOutput.textContent = passLabel; elements.speedOutput.textContent = `${state.speedMultiplier}×`; elements.probeReadout.textContent = hasFrame ? noiseMode ? `30 fps 1/f movie · ${contrast}% contrast` : `${DOTS_PER_FRAME} dots · sample ${state.currentSetPosition}/${PROBES_PER_PASS}` : noiseMode ? 'Pink-noise movie · gray → full contrast → gray' : `${PROBE_DURATION_MS} ms full-screen dot frames`; elements.statusDetail.textContent = hasFrame ? noiseMode ? `${contrast}% contrast · cycle ${pass}${pass > TARGET_PASSES ? ' · ten-cycle target met' : ` of ${TARGET_PASSES}`} · frame ${state.currentSetPosition} of ${totalSamples}` : `${frameText} dots · pass ${pass}${pass > TARGET_PASSES ? ' · ten-pass target met' : ` of ${TARGET_PASSES}`} · sample ${state.currentSetPosition} of ${totalSamples}` : noiseMode ? 'Preparing contrast-modulated 1/f Gaussian noise movie' : 'Preparing balanced full-screen dot sequence'; elements.spikeCount.textContent = `${model.totalSpikes} ${model.totalSpikes === 1 ? 'spike' : 'spikes'}`; const peak = model.peakRate < 1 ? model.peakRate.toFixed(1) : Math.round(model.peakRate).toString(); elements.peakRate.textContent = `±${peak} Hz`; elements.heatPeak.textContent = `±${peak} Hz`;
+      }
+      function scheduleDraw() { if (model.animationFrame === null) model.animationFrame = requestAnimationFrame(draw); }
+      function draw(now) {
+        model.animationFrame = null;
+        const frameDelta = model.lastFrameTime === null ? 0 : clamp(now - model.lastFrameTime,0,45);
+        model.lastFrameTime = now;
+        const simulatedDelta = state.running ? frameDelta * state.speedMultiplier : 0;
+        let frame;
+        if (state.running && simulatedDelta > 0) {
+          const startElapsed = state.simulationElapsed, steps = Math.max(1,Math.ceil(simulatedDelta / 9)), stepDelta = simulatedDelta / steps;
+          for (let step = 1; step <= steps; step += 1) { const elapsed = startElapsed + stepDelta * step; frame = currentBar(elapsed); updateModel(frame,elapsed,stepDelta); }
+          state.simulationElapsed = startElapsed + simulatedDelta;
+        } else frame = currentBar(state.simulationElapsed);
+        drawStimulus(frame);
+        const panelInterval = state.stimulusMode === 'noise' && spatialFrequency() > 8 ? 1000 : state.stimulusMode === 'noise' && spatialFrequency() > 4 ? 300 : 140;
+        if (now - model.lastPanelDraw >= panelInterval) { drawSpikeMap(); const measured = drawRateMap(); drawDataFit(measured,now); updateLiveUi(); model.lastPanelDraw = now; }
+        if (state.running) scheduleDraw();
+      }
+      elements.orientationInput.addEventListener('input',() => { state.preferredOrientation = Number(elements.orientationInput.value); buildRfModel(); clearMapping(true); updateControls(); scheduleDraw(); });
+      elements.frequencyInput.addEventListener('input',() => { state.frequencyOctave = Number(elements.frequencyInput.value); buildRfModel(); clearMapping(true); updateControls(); scheduleDraw(); });
+      elements.stimulusModeButton.addEventListener('click',() => { state.stimulusMode = state.stimulusMode === 'dots' ? 'noise' : 'dots'; clearMapping(true); updateStimulusModeUi(); elements.announcement.textContent = state.stimulusMode === 'noise' ? 'Contrast-modulated one-over-f Gaussian noise movie selected. Fourier-whitened mapping restarted.' : 'Balanced sparse dots selected. Mapping restarted.'; scheduleDraw(); });
+      elements.stimulus.addEventListener('click',selectRfFromPointer);
+      elements.stimulus.addEventListener('keydown',event => { if (!/^Arrow(Left|Right|Up|Down)$/.test(event.key)) return; event.preventDefault(); const step = event.shiftKey ? .1 : .5, dx = event.key === 'ArrowLeft' ? -step : event.key === 'ArrowRight' ? step : 0, dy = event.key === 'ArrowDown' ? -step : event.key === 'ArrowUp' ? step : 0; setRfCenter(state.rfCenterX + dx,state.rfCenterY + dy); });
+      elements.playButton.addEventListener('click',() => { state.running = !state.running; model.lastFrameTime = performance.now(); updateRunningUi(); scheduleDraw(); });
+      elements.speedButton.addEventListener('click',() => { state.speedMultiplier = state.speedMultiplier === 1 ? 4 : 1; const fast = state.speedMultiplier === 4; elements.speedButton.textContent = fast ? 'Normal speed' : 'Speed up 4×'; elements.speedButton.setAttribute('aria-pressed',String(fast)); elements.speedOutput.textContent = `${state.speedMultiplier}×`; elements.announcement.textContent = fast ? 'Mapping speed increased to four times.' : 'Mapping speed returned to normal.'; scheduleDraw(); });
+      elements.restartButton.addEventListener('click',() => { state.running = true; clearMapping(true); updateRunningUi(); scheduleDraw(); });
+      elements.fullscreenButton.addEventListener('click',async () => { if (document.fullscreenElement) await document.exitFullscreen(); else if (elements.stageColumn.requestFullscreen) await elements.stageColumn.requestFullscreen(); });
+      document.addEventListener('fullscreenchange',() => { const expanded = document.fullscreenElement === elements.stageColumn; elements.fullscreenButton.textContent = expanded ? 'Exit fullscreen' : 'Fullscreen'; elements.fullscreenButton.setAttribute('aria-expanded',String(expanded)); model.lastPanelDraw = -Infinity; scheduleDraw(); });
+      window.addEventListener('resize',() => { model.lastPanelDraw = -Infinity; scheduleDraw(); });
+      document.addEventListener('keydown',event => { const target = event.target; if (target && /INPUT|BUTTON|SELECT|TEXTAREA/.test(target.tagName)) return; if (event.code === 'Space') { event.preventDefault(); elements.playButton.click(); } if (event.key.toLowerCase() === 'r') elements.restartButton.click(); });
+      buildRfModel(); clearMapping(false); updateControls(); updateRunningUi(); updateStimulusModeUi(); updateLiveUi(); scheduleDraw();
+    })();
+  </script>
+</body>
+</html>
