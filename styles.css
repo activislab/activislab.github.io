@@ -636,6 +636,71 @@ h1 { max-width: 760px; font-family: var(--display); font-size: clamp(3.5rem, 6.5
   background: var(--paper);
 }
 
+
+.resource-card {
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr) 38px;
+  gap: 28px;
+  align-items: center;
+  min-height: 190px;
+  padding: 32px 0;
+  border-top: 1px solid var(--line);
+  transition: color .2s ease, background .2s ease;
+}
+
+.resource-card:last-of-type {
+  border-bottom: 1px solid var(--line);
+}
+
+.resource-index {
+  align-self: start;
+  color: var(--coral);
+  font-size: .72rem;
+  letter-spacing: .06em;
+}
+
+.resource-type {
+  margin-bottom: 8px;
+  color: var(--cyan-deep);
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .11em;
+  text-transform: lowercase;
+}
+
+.resource-copy h3 {
+  margin-bottom: 12px;
+  font-family: var(--display);
+  font-size: clamp(2rem, 3.3vw, 3.5rem);
+  line-height: 1.05;
+  font-weight: 500;
+  letter-spacing: -.03em;
+}
+
+.resource-copy > p:last-child {
+  max-width: 760px;
+  margin-bottom: 0;
+  color: var(--muted);
+}
+
+.resource-arrow {
+  justify-self: end;
+  color: var(--coral);
+  font-family: var(--display);
+  font-size: 1.4rem;
+  transition: transform .2s ease;
+}
+
+.resource-card:hover .resource-copy h3,
+.resource-card:focus-visible .resource-copy h3 {
+  color: var(--cyan-deep);
+}
+
+.resource-card:hover .resource-arrow,
+.resource-card:focus-visible .resource-arrow {
+  transform: translate(3px, -3px);
+}
+
 .resource-placeholder {
   min-height: 190px;
   display: grid;
@@ -661,89 +726,24 @@ h1 { max-width: 760px; font-family: var(--display); font-size: clamp(3.5rem, 6.5
   color: var(--muted);
 }
 
-.resource-card {
-  min-height: 190px;
-  display: grid;
-  grid-template-columns: 70px minmax(0, 1fr) auto;
-  gap: 28px;
-  align-items: start;
-  padding: 32px 0;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  transition: color .2s ease, padding-left .2s ease, padding-right .2s ease;
-}
-
-.resource-card:hover,
-.resource-card:focus-visible {
-  color: var(--cyan-deep);
-  padding-left: 8px;
-  padding-right: 8px;
-}
-
-.resource-index {
-  color: var(--coral);
-  font-size: .72rem;
-  letter-spacing: .06em;
-}
-
-.resource-copy {
-  min-width: 0;
-}
-
-.resource-type {
-  margin: 0 0 8px;
-  color: var(--cyan-deep);
-  font-size: .68rem;
-  font-weight: 700;
-  letter-spacing: .11em;
-  text-transform: lowercase;
-}
-
-.resource-card h3 {
-  margin: 0 0 12px;
-  font-family: var(--display);
-  font-size: clamp(1.8rem, 3vw, 3rem);
-  line-height: 1.05;
-  font-weight: 500;
-  letter-spacing: -.03em;
-}
-
-.resource-card .resource-copy > p:last-child {
-  max-width: 680px;
-  margin: 0;
-  color: var(--muted);
-  font-size: .92rem;
-}
-
-.resource-arrow {
-  align-self: center;
-  padding-top: 4px;
-  color: var(--coral);
-  font-size: 1.35rem;
-  transition: transform .2s ease;
-}
-
-.resource-card:hover .resource-arrow,
-.resource-card:focus-visible .resource-arrow {
-  transform: translate(3px, -3px);
-}
-
 @media (max-width: 680px) {
-  .resource-placeholder,
   .resource-card {
+    grid-template-columns: 1fr 28px;
+    gap: 10px 18px;
+    min-height: 160px;
+  }
+
+  .resource-index {
+    grid-column: 1 / -1;
+  }
+
+  .resource-copy h3 {
+    font-size: 2.15rem;
+  }
+
+  .resource-placeholder {
     grid-template-columns: 1fr;
     gap: 10px;
     min-height: 150px;
-  }
-
-  .resource-card {
-    position: relative;
-    padding-right: 34px;
-  }
-
-  .resource-arrow {
-    position: absolute;
-    right: 0;
-    top: 32px;
   }
 }
