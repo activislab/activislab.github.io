@@ -21,16 +21,19 @@
     .foveal-heading{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:6px 16px;margin-bottom:14px}
     .foveal-heading h2{margin:0;font-size:1rem;font-weight:700;letter-spacing:-.02em}
     .foveal-heading span{color:#ffffffa6;font-size:.72rem}
-    .foveal-content{display:flex;align-items:center;flex-wrap:wrap;gap:16px 24px}
-    .foveal-square{position:relative;flex:0 1 320px;width:min(100%,320px);aspect-ratio:1;background:#142022;border:1px solid #ffffff30}
-    .foveal-square canvas{display:block;width:100%;height:100%;image-rendering:auto}
+    .foveal-content{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+    .foveal-view{min-width:0;margin:0;text-align:center}
+    .foveal-view figcaption{margin-bottom:12px;color:#ffffffed;font-size:.85rem;font-weight:700}
+    .foveal-circle{position:relative;width:min(100%,320px);aspect-ratio:1;margin:0 auto;overflow:hidden;border-radius:50%;background:#142022;border:1px solid #ffffff30}
+    .foveal-circle canvas{display:block;width:100%;height:100%;image-rendering:auto}
+    .foveal-description{max-width:320px;margin:12px auto 0;color:#ffffffa6;font-size:.72rem;line-height:1.5}
     .foveal-crosshair{position:absolute;inset:50% auto auto 50%;width:18px;height:18px;transform:translate(-50%,-50%);pointer-events:none;filter:drop-shadow(0 1px 2px #000)}
     .foveal-crosshair:before,.foveal-crosshair:after{content:"";position:absolute;background:#fff;border-radius:1px}
     .foveal-crosshair:before{left:8px;top:0;width:2px;height:18px}
     .foveal-crosshair:after{left:0;top:8px;width:18px;height:2px}
-    .foveal-help{flex:1 1 150px;margin:0;max-width:320px;color:#ffffffa6;font-size:.75rem;line-height:1.6}
-    .foveal-help strong{display:block;margin-bottom:6px;color:#ffffffed;font-size:.8rem}
+    .foveal-help{margin:18px 0 0;color:#ffffffa6;font-size:.72rem;line-height:1.6}
     .foveal-help small{display:block;margin-top:8px;font-size:.7rem;color:#ffffff80}
+    @media(max-width:640px){.foveal-content{gap:14px}.foveal-view figcaption{font-size:.76rem}.foveal-description{font-size:.66rem}}
   </style>
 </head>
 <body>
@@ -52,11 +55,20 @@
       </div>
       <div class="representation"><b id="view-title">Evidence-based percept illustration</b><span id="view-note">This is a teaching model, not a literal reconstruction of conscious experience.</span></div>
       <section class="foveal-panel" aria-labelledby="foveal-heading">
-        <div class="foveal-heading"><h2 id="foveal-heading">Foveal view</h2><span>10° × 10° · ±5° from fixation</span></div>
+        <div class="foveal-heading"><h2 id="foveal-heading">Foveal views</h2><span>10° diameter · 5° radius</span></div>
         <div class="foveal-content">
-          <div class="foveal-square"><canvas id="foveal-canvas" width="320" height="320" role="img" aria-label="Gaze-centered 10 by 10 degree view of the selected simulation" aria-describedby="foveal-help"></canvas><span class="foveal-crosshair" aria-hidden="true"></span></div>
-          <p class="foveal-help" id="foveal-help"><strong id="foveal-view-label">Modeled percept</strong>The crosshair stays at fixation while the scene moves with gaze. This enlarged view follows the same playback time and visual effects.<small>Each edge is 5° from the center. Dark areas beyond the scene mark the edge of the visual field.</small></p>
+          <figure class="foveal-view">
+            <figcaption>No compensation</figcaption>
+            <div class="foveal-circle"><canvas id="uncompensated-foveal-canvas" width="320" height="320" role="img" aria-label="No compensation, circular 10 degree diameter view centered on fixation" aria-describedby="uncompensated-foveal-description foveal-help"></canvas><span class="foveal-crosshair" aria-hidden="true"></span></div>
+            <p class="foveal-description" id="uncompensated-foveal-description">Selected spatial effects, with all saccade-stability mechanisms off.</p>
+          </figure>
+          <figure class="foveal-view">
+            <figcaption id="foveal-view-label">Modeled percept</figcaption>
+            <div class="foveal-circle"><canvas id="foveal-canvas" width="320" height="320" role="img" aria-label="Circular 10 degree diameter view of the selected simulation centered on fixation" aria-describedby="modeled-foveal-description foveal-help"></canvas><span class="foveal-crosshair" aria-hidden="true"></span></div>
+            <p class="foveal-description" id="modeled-foveal-description">The selected view above, with its enabled visual effects.</p>
+          </figure>
         </div>
+        <p class="foveal-help" id="foveal-help">Both crosshairs stay at the same fixation and follow the same playback time. Each circle extends 5° from its center.<small>Gaze-centering removes the global translation from both crops, so world stabilization is best compared in the main view. Dark areas beyond the scene mark the edge of the visual field.</small></p>
       </section>
     </div>
     <aside class="controls" aria-label="Simulation controls">
@@ -133,7 +145,7 @@
   function ownCanvas(width,height,existing){var result=existing||document.createElement('canvas');if(result.width!==width||result.height!==height){result.width=width;result.height=height;}return result;}
   function resetContext(context,canvas){context.setTransform(1,0,0,1,0,0);context.globalAlpha=1;context.globalCompositeOperation='source-over';if('filter' in context)context.filter='none';context.imageSmoothingEnabled=true;try{context.imageSmoothingQuality='high';}catch(ignore){}context.clearRect(0,0,canvas.width,canvas.height);return context;}
 
-  var canvas=$('canvas'),stage=$('stage'),ctx=canvas.getContext('2d'),fovealCanvas=$('foveal-canvas'),fovealContext=fovealCanvas.getContext('2d');
+  var canvas=$('canvas'),stage=$('stage'),ctx=canvas.getContext('2d'),fovealCanvas=$('foveal-canvas'),uncompensatedFovealCanvas=$('uncompensated-foveal-canvas');
   var pool=[],poolIndex=0,raf=0,animationAnchor=0,animationStart=0,analysisTimer=0,sourceVersion=0,loadToken=0;
   var spatialCache={},saliencyLayerCache=null,scenePyramidCache=null,scanpathLayerCache=null,lastStatusKey='';
   function buffer(width,height){var result=pool[poolIndex++]||document.createElement('canvas');pool[poolIndex-1]=result;if(result.width!==width||result.height!==height){result.width=width;result.height=height;}resetContext(result.getContext('2d'),result);return result;}
@@ -346,7 +358,7 @@
     return dynamic;
   }
 
-  function overlayOffset(width,height,playback){var stabilization=state.view==='original'||state.view==='saliency'||state.view==='scanpath'?1:state.view==='retinal'?0:strength('stabilization'),anchor=state.scanpath.fixations[0].point;return{x:-(playback.gaze.x-anchor.x)*width*(1-stabilization),y:-(playback.gaze.y-anchor.y)*height*(1-stabilization)};}
+  function overlayOffset(width,height,playback,mode){mode=mode||state.view;var stabilization=mode==='original'||mode==='saliency'||mode==='scanpath'?1:mode==='retinal'?0:strength('stabilization'),anchor=state.scanpath.fixations[0].point;return{x:-(playback.gaze.x-anchor.x)*width*(1-stabilization),y:-(playback.gaze.y-anchor.y)*height*(1-stabilization)};}
   function getFullScanpathLayer(width,height){
     var key=[sourceVersion,state.scanpath.seed,state.scanpath.fixations.length,state.scanpath.saccades.length,width,height].join('|');if(scanpathLayerCache&&scanpathLayerCache.key===key)return scanpathLayerCache.canvas;
     var layer=ownCanvas(width,height,scanpathLayerCache&&scanpathLayerCache.canvas),context=resetContext(layer.getContext('2d'),layer),routePoints=[],firstPoint=state.scanpath.fixations.length?state.scanpath.fixations[0].point:state.scanpath.saccades.length?state.scanpath.saccades[0].from:null;if(firstPoint)routePoints.push(firstPoint);
@@ -355,10 +367,10 @@
     state.scanpath.fixations.forEach(function(fixation){context.fillStyle='#ffffffe0';context.strokeStyle='#000000c7';context.lineWidth=Math.max(1,width*.0011);context.beginPath();context.arc(fixation.point.x*width,fixation.point.y*height,Math.max(2,width*.0024),0,Math.PI*2);context.fill();context.stroke();});
     if(routePoints.length){var start={x:routePoints[0].x*width,y:routePoints[0].y*height},last=routePoints[routePoints.length-1],end={x:last.x*width,y:last.y*height},markerRadius=Math.max(7,width*.007);context.shadowColor='#000000d1';context.shadowBlur=Math.max(3,width*.003);context.strokeStyle='#64e1da';context.lineWidth=Math.max(2,width*.0025);context.beginPath();context.arc(start.x,start.y,markerRadius,0,Math.PI*2);context.stroke();context.strokeStyle='#ff7656';context.strokeRect(end.x-markerRadius,end.y-markerRadius,markerRadius*2,markerRadius*2);}context.restore();scanpathLayerCache={key:key,canvas:layer};return layer;
   }
-  function drawOverlay(context,width,height,playback){
-    var offset=overlayOffset(width,height,playback),display=function(point){return{x:point.x*width+offset.x,y:point.y*height+offset.y};},current=display(playback.gaze);context.save();
+  function drawOverlay(context,width,height,playback,mode){
+    mode=mode||state.view;var offset=overlayOffset(width,height,playback,mode),display=function(point){return{x:point.x*width+offset.x,y:point.y*height+offset.y};},current=display(playback.gaze);context.save();
     if(state.rings){context.strokeStyle='#ffffff48';context.lineWidth=Math.max(1,width*.0012);[2,5,10,20].forEach(function(degrees){context.beginPath();context.arc(current.x,current.y,width*degrees/HFOV,0,Math.PI*2);context.stroke();});}
-    if(state.fullPath||state.view==='scanpath')context.drawImage(getFullScanpathLayer(width,height),offset.x,offset.y);
+    if(state.fullPath||mode==='scanpath')context.drawImage(getFullScanpathLayer(width,height),offset.x,offset.y);
     context.restore();
   }
   function drawGazeIndicator(context,width,height,playback){
@@ -384,26 +396,34 @@
   }
   function sizeCanvas(){var rect=canvas.getBoundingClientRect();if(!rect.width||!rect.height)return null;var cssWidth=Math.ceil(rect.width),dpr=Math.min(window.devicePixelRatio||1,isWebKit?1.6:1.8),cap=Math.max(isWebKit?1600:2000,cssWidth),width=Math.min(cap,Math.max(480,cssWidth,Math.round(rect.width*dpr))),height=Math.round(width*rect.height/rect.width);if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;invalidateRendering();}resetContext(ctx,canvas);return{width:width,height:height};}
   function renderPreparing(size){drawSource(ctx,size.width,size.height,0,0);var point={x:state.start.x*size.width,y:state.start.y*size.height},radius=Math.max(28,size.width*.048),gradient=ctx.createRadialGradient(point.x,point.y,0,point.x,point.y,radius);gradient.addColorStop(0,'rgba(255,255,255,.4)');gradient.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=gradient;ctx.beginPath();ctx.arc(point.x,point.y,radius,0,Math.PI*2);ctx.fill();updateStatus(null);}
-  function fovealWindow(width,height,playback){
-    var offset=overlayOffset(width,height,playback),cropWidth=width*FOVEAL_VIEW_DEG/HFOV,cropHeight=height*FOVEAL_VIEW_DEG/VFOV;
+  function fovealWindow(width,height,playback,mode){
+    var offset=overlayOffset(width,height,playback,mode),cropWidth=width*FOVEAL_VIEW_DEG/HFOV,cropHeight=height*FOVEAL_VIEW_DEG/VFOV;
     return{x:playback.gaze.x*width+offset.x-cropWidth/2,y:playback.gaze.y*height+offset.y-cropHeight/2,width:cropWidth,height:cropHeight};
   }
-  function drawFovealView(source,width,height,playback){
-    var rect=fovealCanvas.getBoundingClientRect();if(!rect.width)return;
+  function drawFovealView(target,source,width,height,playback,mode){
+    var rect=target.getBoundingClientRect();if(!rect.width)return;
     var side=Math.max(1,Math.round(rect.width*Math.min(window.devicePixelRatio||1,2)));
-    if(fovealCanvas.width!==side||fovealCanvas.height!==side){fovealCanvas.width=side;fovealCanvas.height=side;}
-    resetContext(fovealContext,fovealCanvas);fovealContext.fillStyle='#142022';fovealContext.fillRect(0,0,side,side);
-    if(!source||!playback)return;
-    var crop=fovealWindow(width,height,playback),left=Math.max(0,crop.x),top=Math.max(0,crop.y),right=Math.min(width,crop.x+crop.width),bottom=Math.min(height,crop.y+crop.height);
-    // Clip the source, not the gaze-centered window: fixation stays centered at field edges.
-    if(right>left&&bottom>top)fovealContext.drawImage(source,left,top,right-left,bottom-top,(left-crop.x)/crop.width*side,(top-crop.y)/crop.height*side,(right-left)/crop.width*side,(bottom-top)/crop.height*side);
+    if(target.width!==side||target.height!==side){target.width=side;target.height=side;}
+    var context=resetContext(target.getContext('2d'),target);context.save();context.beginPath();context.arc(side/2,side/2,side/2,0,Math.PI*2);context.clip();context.fillStyle='#142022';context.fillRect(0,0,side,side);
+    if(source&&playback){
+      var crop=fovealWindow(width,height,playback,mode),left=Math.max(0,crop.x),top=Math.max(0,crop.y),right=Math.min(width,crop.x+crop.width),bottom=Math.min(height,crop.y+crop.height);
+      // Clip the source, not the gaze-centered window: fixation stays centered at field edges.
+      if(right>left&&bottom>top)context.drawImage(source,left,top,right-left,bottom-top,(left-crop.x)/crop.width*side,(top-crop.y)/crop.height*side,(right-left)/crop.width*side,(bottom-top)/crop.height*side);
+    }
+    context.restore();
   }
   function render(){
-    var size=sizeCanvas();if(!size)return;poolIndex=0;if(!state.scanpath||!state.saliency){renderPreparing(size);drawFovealView(null,size.width,size.height,null);return;}var playback=resolvePlayback(state.scanpath,state.time),width=size.width,height=size.height;
+    var size=sizeCanvas();if(!size)return;poolIndex=0;if(!state.scanpath||!state.saliency){renderPreparing(size);drawFovealView(fovealCanvas,null,size.width,size.height,null);drawFovealView(uncompensatedFovealCanvas,null,size.width,size.height,null);return;}var playback=resolvePlayback(state.scanpath,state.time),width=size.width,height=size.height;
     ctx.drawImage(renderMode(state.view==='scanpath'?'original':state.view,width,height,playback),0,0);
     drawOverlay(ctx,width,height,playback);
     // Reuse the completed effects/overlays, before the large gaze glow is added to the main view.
-    drawFovealView(canvas,width,height,playback);drawGazeIndicator(ctx,width,height,playback);updateStatus(playback);
+    drawFovealView(fovealCanvas,canvas,width,height,playback,state.view);
+    // Retinal mode keeps the selected spatial limits but omits every compensatory mechanism.
+    // Its separate spatial cache shares the scene pyramid without changing the user's controls.
+    poolIndex=0;var uncompensated=state.view==='retinal'?canvas:renderMode('retinal',width,height,playback);
+    if(uncompensated!==canvas)drawOverlay(uncompensated.getContext('2d'),width,height,playback,'retinal');
+    drawFovealView(uncompensatedFovealCanvas,uncompensated,width,height,playback,'retinal');
+    drawGazeIndicator(ctx,width,height,playback);updateStatus(playback);
   }
 
   function speedText(rate){if(rate<=0)return'Paused';var rounded=Math.round(rate*100)/100;return String(rounded)+'×';}
@@ -433,7 +453,7 @@
     canvas.setAttribute('aria-label','Active vision simulation.'+(state.fullPath||state.view==='scanpath'?' The complete five-minute scanpath is overlaid.':'')+' Click to restart the scanpath at a chosen fixation.');
     var viewNames={original:'Original',saliency:'Saliency',retinal:'Retinal input',percept:'Modeled percept',scanpath:'5 min scanpath'};
     $('foveal-view-label').textContent=viewNames[state.view];
-    fovealCanvas.setAttribute('aria-label',viewNames[state.view]+', gaze-centered 10 by 10 degree view, extending 5 degrees in each direction from the central fixation crosshair');
+    fovealCanvas.setAttribute('aria-label',viewNames[state.view]+', circular 10 degree diameter view, extending 5 degrees from the central fixation crosshair');
   }
   function syncControls(){defs.forEach(function(definition){var input=document.querySelector('.m-enable[data-id="'+definition.id+'"]');if(input)input.checked=state.mechanisms[definition.id].enabled;});$('show-full-path').checked=state.fullPath;$('show-saliency').checked=state.saliencyOverlay;$('show-rings').checked=state.rings;updateCanvasLabel();}
   function buildRefs(){refs.forEach(function(reference,index){var phenomena=(reference.phenomena||[]).slice();defs.forEach(function(definition){if(definition.ref===reference.id)phenomena.push(definition.label);});var punctuation=/[.!?]$/.test(reference.title)?' ':'. ',item=document.createElement('li');item.innerHTML='<span class="ref-no">'+String(index+1).padStart(2,'0')+'</span><div><p class="phenomena">'+phenomena.join(' · ')+'</p><p>'+reference.authors+' ('+reference.year+'). <b>'+reference.title+'</b>'+punctuation+'<i>'+reference.journal+'.</i></p><a target="_blank" rel="noreferrer" href="https://doi.org/'+reference.doi+'">doi:'+reference.doi+'</a></div>';$('refs').appendChild(item);});}
