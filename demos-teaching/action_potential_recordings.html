@@ -864,12 +864,16 @@ function intracellularElectrode() {
     ]
   ], '#b69c64', 1.8);
 
+  const electrodeLabel = 'Intracellular electrode';
+  const labelSize = W < 340 ? 10 : 11;
+  ctx.font = `${labelSize}px system-ui`;
+  const labelX = Math.max(12 + ctx.measureText(electrodeLabel).width / 2, base[0] - 46);
   text(
-    'Intracellular electrode',
-    base[0],
+    electrodeLabel,
+    labelX,
     base[1] - 22,
     C.intra,
-    11,
+    labelSize,
     'center'
   );
 
@@ -930,47 +934,35 @@ function extracellularElectrode() {
   amplifier(false, C.extra);
 }
 
-/* Optional anatomy labels. Compact diagrams use numbered callouts and a key. */
+/* Cell-relative callouts stay beside the anatomy at every viewport size. */
 
 function neuronComponents() {
   if (!$('components').checked) return;
 
-  const compact = W < 600;
   const labels = [
-    { number: '01', name: 'Apical dendrites', anchor: [-1, 110], badge: [-66, 109], x: 20, y: Y(120), align: 'left' },
-    { number: '02', name: 'Soma', anchor: [8, 0], badge: [80, 18], x: W - 20, y: Y(24), align: 'right' },
-    { number: '03', name: 'Basal dendrites', anchor: [-44, -25], badge: [-95, -47], x: 20, y: Y(-32), align: 'left' },
-    { number: '04', name: 'Axon', anchor: [1, -74], badge: [30, -83], x: X(65), y: Math.min(H - 15, Y(-84)), align: 'left' }
+    { number: '01', anchor: [-23, 170], badge: [-66, 168] },
+    { number: '02', anchor: [8, 0], badge: [80, 18] },
+    { number: '03', anchor: [-44, -26], badge: [-95, -47] },
+    { number: '04', anchor: [-1.2, -74], badge: [30, -83] }
   ];
 
   ctx.save();
   for (const item of labels) {
     const ax = X(item.anchor[0]);
     const ay = Y(item.anchor[1]);
-    ctx.font = '600 11px system-ui';
-    const caption = `${item.number}  ${item.name}`;
-    const width = ctx.measureText(caption).width + 16;
-    const labelX = compact ? X(item.badge[0]) : item.x;
-    const labelY = compact ? Y(item.badge[1]) : item.y;
-    const left = item.align === 'right' ? labelX - width : labelX;
-    const endX = compact ? labelX : (ax > left + width / 2 ? left + width : left);
+    const labelX = X(item.badge[0]);
+    const labelY = Y(item.badge[1]);
 
     ctx.setLineDash([3, 3]);
-    line([[ax, ay], [endX, labelY]], '#52645e', .9);
+    line([[ax, ay], [labelX, labelY]], '#52645e', .9);
     ctx.setLineDash([]);
     circle(ax, ay, 2, '#52645e');
 
-    if (compact) {
-      circle(labelX, labelY, 11, 'rgba(255,253,248,.97)');
-      ctx.strokeStyle = '#82928b';
-      ctx.lineWidth = .8;
-      ctx.stroke();
-      text(item.number, labelX, labelY + 3.5, '#245e58', 10, 'center');
-    } else {
-      ctx.fillStyle = 'rgba(255,253,248,.95)';
-      ctx.fillRect(left, labelY - 11, width, 22);
-      text(caption, left + 8, labelY + 4, '#304b43', 11);
-    }
+    circle(labelX, labelY, 11, 'rgba(255,253,248,.97)');
+    ctx.strokeStyle = '#82928b';
+    ctx.lineWidth = .8;
+    ctx.stroke();
+    text(item.number, labelX, labelY + 3.5, '#245e58', 10, 'center');
   }
   ctx.restore();
 }
