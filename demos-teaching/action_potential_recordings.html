@@ -49,13 +49,19 @@
     .viewer { display: flex; flex-direction: column; min-width: 0; background: var(--night); color: #fff; }
     .viewer-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; min-height: 56px; padding: 10px 16px; border-bottom: 1px solid #ffffff19; background: #162123; }
     .viewer-title { font-size: .75rem; font-weight: 700; }
-    .display-controls { display: flex; gap: 16px; }
+    .display-controls { display: flex; flex-wrap: wrap; gap: 10px 16px; }
     .display-controls label { display: inline-flex; align-items: center; gap: 6px; color: #ffffffcc; font-size: .72rem; }
     .display-controls input { width: 14px; height: 14px; margin: 0; }
     .scene { position: relative; flex: 1; min-height: 490px; background: #fff; }
     #field { display: block; width: 100%; height: 100%; position: absolute; inset: 0; touch-action: none; }
     .scene-hint { margin: 0; padding: 11px 16px; border-top: 1px solid #ffffff19; color: #ffffffaa; font-size: .7rem; line-height: 1.5; }
     .scene-hint b { color: #fff; }
+    .component-key { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 0; padding: 14px 16px; border-top: 1px solid var(--line); background: #f1f4ef; color: var(--ink); list-style: none; }
+    .component-key[hidden] { display: none; }
+    .component-key li { display: grid; grid-template-columns: 19px minmax(0, 1fr); align-content: start; gap: 2px 6px; }
+    .component-key .component-number { color: var(--teal); font: 700 .65rem ui-monospace, monospace; line-height: 1.6; }
+    .component-key b { font-size: .7rem; line-height: 1.5; }
+    .component-key small { grid-column: 2; color: #536064; font-size: .64rem; line-height: 1.5; }
     .transport { padding: 14px 16px 16px; border-top: 1px solid #ffffff19; background: #121c1e; }
     .transport-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
     .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 36px; border: 1px solid #ffffff30; border-radius: 999px; background: transparent; color: #ffffffdf; padding: 7px 14px; font-size: .72rem; font-weight: 750; }
@@ -105,6 +111,7 @@
       .hero { align-items: start; flex-direction: column; gap: 16px; }
       .layout { grid-template-columns: minmax(0, 1fr) 300px; }
       .source-note { margin-left: 17px; }
+      .component-key { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 800px) {
       .layout { grid-template-columns: 1fr; }
@@ -172,7 +179,7 @@
   <div class="source-line">
     <i class="dot" aria-hidden="true"></i>
     <span>Original demo created by <a href="https://patrickjendritza.com" target="_blank" rel="noopener noreferrer">Patrick Jendritza</a>.</span>
-    <span class="source-note">Layout adapted for ActivisLab · Illustrative single-neuron model</span>
+    <span class="source-note">Layout and cell illustration adapted for ActivisLab · Illustrative model</span>
   </div>
 
   <section class="layout" aria-label="Intracellular and extracellular action potential simulator">
@@ -182,11 +189,18 @@
         <div class="display-controls" role="group" aria-label="Field display">
           <label><input id="contours" type="checkbox" checked>Contours</label>
           <label><input id="ions" type="checkbox" checked>Ion flow</label>
+          <label><input id="components" type="checkbox" aria-controls="component-key">Cell components</label>
         </div>
       </div>
       <div class="scene">
-        <canvas id="field" role="img" tabindex="0" aria-label="Neuron with intracellular electrode and a draggable extracellular electrode. Drag the extracellular electrode tip or use the arrow keys." aria-describedby="field-help"></canvas>
+        <canvas id="field" role="img" tabindex="0" aria-label="Pyramidal neuron with branching apical and basal dendrites, a tapered soma, and a slender axon. Drag the extracellular electrode tip or use the arrow keys." aria-describedby="field-help"></canvas>
       </div>
+      <ol class="component-key" id="component-key" hidden>
+        <li><span class="component-number">01</span><b>Apical dendrites</b><small>The main dendritic tree above the soma.</small></li>
+        <li><span class="component-number">02</span><b>Soma</b><small>The cell body, containing the nucleus.</small></li>
+        <li><span class="component-number">03</span><b>Basal dendrites</b><small>Branches spreading from the base of the soma.</small></li>
+        <li><span class="component-number">04</span><b>Axon</b><small>The thin process carrying the cell’s output.</small></li>
+      </ol>
       <p class="scene-hint" id="field-help"><b>Drag the extracellular electrode tip</b> to explore the field. Focus the diagram and use the arrow keys for fine adjustments.</p>
       <div class="transport">
         <div class="transport-actions">
@@ -245,6 +259,10 @@
       Positive transmembrane current is outward (source); negative current
       is inward (sink). Current locations and passive return currents are
       schematic.
+      The detailed pyramidal-cell drawing is an anatomical illustration;
+      its fine branches do not add current compartments to the original
+      six-compartment model. The axon is drawn for orientation, not as a
+      simulated propagating action potential.
       Membrane voltage and currents are prescribed independently and are not
       solved self-consistently. A remote-reference intracellular measurement
       approximates Vₘ when the local extracellular contribution is small.
@@ -263,7 +281,7 @@
   </section>
 
   <footer class="footer">
-    <p>Original simulation by <a href="https://patrickjendritza.com" target="_blank" rel="noopener noreferrer">Patrick Jendritza</a>. Layout adapted for ActivisLab.</p>
+    <p>Original simulation by <a href="https://patrickjendritza.com" target="_blank" rel="noopener noreferrer">Patrick Jendritza</a>. Layout and cell illustration adapted for ActivisLab.</p>
     <p>Keyboard: <kbd>Space</kbd> play/pause · <kbd>←</kbd> <kbd>↑</kbd> <kbd>↓</kbd> <kbd>→</kbd> move the focused electrode</p>
   </footer>
 </main>
@@ -271,7 +289,7 @@
 'use strict';
 
 // Original simulation: Patrick Jendritza — https://patrickjendritza.com
-// Layout and playback/accessibility integration adapted for ActivisLab.
+// Layout, cell illustration, and playback/accessibility integration adapted for ActivisLab.
 
 const $ = id => document.getElementById(id);
 const field = $('field');
@@ -545,28 +563,124 @@ function fieldMap(current) {
 
 /* Neuron geometry. */
 
-const branches = [
-  [[0, 12], [0, 45], [0, 95], [0, 146]],
-  [[0, 146], [-9, 163], [-24, 178]],
-  [[0, 146], [10, 165], [25, 179]],
-  [[0, 95], [-17, 116], [-29, 131]],
-  [[0, 80], [16, 99], [29, 109]],
-  [[-8, -6], [-27, -18], [-40, -25], [-61, -35]],
-  [[8, -6], [27, -18], [40, -25], [61, -35]],
-  [[0, -12], [0, -44], [4, -76]]
+/* Original, schematic pyramidal-cell drawing. Coordinates are in model space.
+   The finely tapered outline is shared by painting and probe collision checks. */
+
+const neuriteSpecs = [
+  // Apical shaft and its asymmetric terminal crown.
+  { part: 'apical', radii: [3.4, .22], points: [[0,11],[-.8,29],[.8,46],[-.3,64],[.4,83],[-.9,102],[-.3,119],[-3.7,136],[-7.3,151],[-15,166],[-19,180]] },
+  { part: 'apical', radii: [1.05,.17], points: [[-5,143],[2,157],[9,165],[19,174],[31,178]] },
+  { part: 'apical', radii: [.66,.12], points: [[7,163],[16,166],[26,168],[37,168.5]] },
+  { part: 'apical', radii: [.67,.13], points: [[-13,163],[-23,170],[-31,174],[-36,180]] },
+  { part: 'apical', radii: [.45,.11], points: [[-23,170],[-26,179],[-30,186]] },
+  { part: 'apical', radii: [.57,.12], points: [[-15,167],[-12,176],[-13,186]] },
+  { part: 'apical', radii: [.54,.12], points: [[-8,153],[-18,158],[-25,164],[-33,168]] },
+  { part: 'apical', radii: [.4,.1], points: [[-25,164],[-30,165],[-39,171]] },
+  { part: 'apical', radii: [.49,.12], points: [[-3,139],[-1,150],[1,157],[0,169]] },
+
+  // Oblique dendrites leave the shaft at different heights and angles.
+  { part: 'apical', radii: [1.4,.14], points: [[-.4,104],[-10,115],[-17,120],[-22,130],[-22,139]] },
+  { part: 'apical', radii: [.68,.11], points: [[-17,120],[-28,122],[-35,128],[-39,135]] },
+  { part: 'apical', radii: [.45,.11], points: [[-28,122],[-30,131],[-28,137]] },
+  { part: 'apical', radii: [1.3,.14], points: [[0,99],[10,109],[17,121],[21,134],[25,141]] },
+  { part: 'apical', radii: [.65,.12], points: [[17,121],[26,127],[32,134]] },
+  { part: 'apical', radii: [.45,.1], points: [[21,133],[20,141],[22,148]] },
+  { part: 'apical', radii: [1.3,.15], points: [[.1,73],[12,83],[18,92],[28,100],[33,108]] },
+  { part: 'apical', radii: [.58,.11], points: [[18,92],[21,101],[20,111]] },
+  { part: 'apical', radii: [.47,.1], points: [[28,100],[36,103],[40,110]] },
+  { part: 'apical', radii: [1.6,.16], points: [[0,49],[-9,61],[-18,66],[-22,76],[-29,84]] },
+  { part: 'apical', radii: [.73,.11], points: [[-18,66],[-29,69],[-35,78],[-38,87]] },
+  { part: 'apical', radii: [.48,.1], points: [[-9,61],[-12,73],[-11,81]] },
+  { part: 'apical', radii: [.82,.12], points: [[0,37],[7,48],[9,58],[13,65]] },
+  { part: 'apical', radii: [.5,.1], points: [[7,48],[17,53],[21,61]] },
+
+  // Basal arbor: irregular primary stems, each with progressively finer forks.
+  { part: 'basal', radii: [2.0,.15], points: [[-8,-1],[-18,-6],[-28,-17],[-40,-25],[-54,-29],[-69,-37],[-82,-44]] },
+  { part: 'basal', radii: [1.05,.11], points: [[-28,-17],[-41,-13],[-54,-18],[-66,-18],[-78,-23]] },
+  { part: 'basal', radii: [.57,.1], points: [[-54,-18],[-62,-11],[-72,-10],[-78,-5]] },
+  { part: 'basal', radii: [.61,.1], points: [[-40,-25],[-47,-36],[-60,-45],[-64,-54]] },
+  { part: 'basal', radii: [.47,.1], points: [[-69,-37],[-72,-45],[-83,-53]] },
+  { part: 'basal', radii: [1.6,.12], points: [[-8,-5],[-18,-17],[-24,-29],[-34,-38],[-40,-49],[-49,-57]] },
+  { part: 'basal', radii: [.8,.1], points: [[-24,-29],[-38,-32],[-49,-37],[-60,-37],[-69,-42]] },
+  { part: 'basal', radii: [1.2,.12], points: [[-10,1],[-20,5],[-31,4],[-41,8],[-49,17],[-52,25]] },
+  { part: 'basal', radii: [.57,.1], points: [[-31,4],[-39,0],[-52,0],[-62,6],[-68,14]] },
+  { part: 'basal', radii: [1.05,.11], points: [[-4,-9],[-10,-23],[-8,-34],[-14,-44],[-15,-57]] },
+  { part: 'basal', radii: [.58,.1], points: [[-10,-23],[-18,-36],[-21,-47],[-29,-55]] },
+  { part: 'basal', radii: [1.95,.15], points: [[8,-2],[20,-9],[30,-18],[40,-25],[56,-27],[70,-34],[82,-42]] },
+  { part: 'basal', radii: [.93,.11], points: [[30,-18],[43,-15],[56,-19],[68,-19],[80,-22],[87,-28]] },
+  { part: 'basal', radii: [.56,.1], points: [[56,-19],[62,-11],[73,-8],[83,-7]] },
+  { part: 'basal', radii: [.72,.1], points: [[40,-25],[43,-35],[56,-43],[63,-51]] },
+  { part: 'basal', radii: [.46,.09], points: [[70,-34],[78,-34],[88,-40]] },
+  { part: 'basal', radii: [1.4,.13], points: [[7,-6],[17,-19],[22,-32],[31,-41],[35,-54]] },
+  { part: 'basal', radii: [.7,.1], points: [[22,-32],[33,-31],[43,-39],[47,-49]] },
+  { part: 'basal', radii: [1.25,.12], points: [[9,1],[23,3],[34,8],[42,8],[50,16],[60,20]] },
+  { part: 'basal', radii: [.57,.1], points: [[34,8],[37,18],[37,27],[40,33]] },
+  { part: 'basal', radii: [1.0,.1], points: [[3,-10],[8,-24],[6,-36],[11,-48],[17,-58]] },
+
+  // Thin axon and a small collateral, visually distinct from the basal tree.
+  { part: 'axon', radii: [.92,.39], points: [[0,-10],[-.6,-25],[.4,-40],[-.7,-55],[-1,-71],[-2.1,-88]] },
+  { part: 'axon', radii: [.47,.11], points: [[-1,-69],[-11,-67],[-18,-63],[-22,-64]] }
 ];
 
+// Uniform Catmull–Rom interpolation gives continuous branches without a
+// hand-drawn-looking zigzag. Sampling is performed only once, not each frame.
+function sampleNeurite(spec) {
+  const samples = [];
+  const points = spec.points;
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = points[Math.max(0, i - 1)];
+    const p1 = points[i];
+    const p2 = points[i + 1];
+    const p3 = points[Math.min(points.length - 1, i + 2)];
+    const count = Math.max(5, Math.ceil(Math.hypot(p2[0] - p1[0], p2[1] - p1[1]) / 2));
+    for (let k = 0; k < count; k++) {
+      const u = k / count;
+      const u2 = u * u;
+      const u3 = u2 * u;
+      samples.push([0, 1].map(d => .5 * (
+        2 * p1[d] + (-p0[d] + p2[d]) * u +
+        (2 * p0[d] - 5 * p1[d] + 4 * p2[d] - p3[d]) * u2 +
+        (-p0[d] + 3 * p1[d] - 3 * p2[d] + p3[d]) * u3
+      )));
+    }
+  }
+  samples.push([...points[points.length - 1]]);
+  let length = 0;
+  const distances = samples.map((p, i) => {
+    if (i) length += Math.hypot(p[0] - samples[i - 1][0], p[1] - samples[i - 1][1]);
+    return length;
+  });
+  const centerline = samples.map((p, i) => ({
+    x: p[0], y: p[1],
+    r: spec.radii[1] + (spec.radii[0] - spec.radii[1]) * Math.pow(1 - distances[i] / length, 1.15)
+  }));
+  const left = [], right = [];
+  centerline.forEach((p, i) => {
+    const before = centerline[Math.max(0, i - 1)];
+    const after = centerline[Math.min(centerline.length - 1, i + 1)];
+    const length = Math.hypot(after.x - before.x, after.y - before.y) || 1;
+    const nx = -(after.y - before.y) / length;
+    const ny = (after.x - before.x) / length;
+    left.push([p.x + nx * p.r, p.y + ny * p.r]);
+    right.push([p.x - nx * p.r, p.y - ny * p.r]);
+  });
+  return { part: spec.part, centerline, outline: left.concat(right.reverse()) };
+}
+
+const neurites = neuriteSpecs.map(sampleNeurite);
+
+// A tapered pyramidal soma; the intracellular electrode at (-7, 4) stays inside.
 const somaCurves = [
-  [[0, 19], [8, 10], [19, -5], [14, -12]],
-  [[14, -12], [7, -19], [-10, -18], [-15, -10]],
-  [[-15, -10], [-19, -3], [-8, 10], [0, 19]]
+  [[0,18],[2.9,10],[8,3],[12,-7]],
+  [[12,-7],[10,-11],[4,-12],[0,-12.8]],
+  [[0,-12.8],[-6,-12],[-10,-10],[-12,-7]],
+  [[-12,-7],[-10,1],[-5,9],[0,18]]
 ];
 
 const somaOutline = somaCurves.flatMap(curve =>
   Array.from({ length: 40 }, (_, k) => {
     const u = k / 40;
     const v = 1 - u;
-
     return [0, 1].map(d =>
       v * v * v * curve[0][d] +
       3 * v * v * u * curve[1][d] +
@@ -577,18 +691,19 @@ const somaOutline = somaCurves.flatMap(curve =>
 );
 
 function neuron() {
-  for (let j = 0; j < branches.length; j++) {
-    const points = branches[j].map(point => [
-      X(point[0]), Y(point[1])
-    ]);
-
-    line(points, '#8ea9ae', j === 0 ? 9 : 5);
-    line(points, '#e1ebeb', j === 0 ? 6.5 : 3);
+  ctx.save();
+  ctx.fillStyle = '#304841';
+  for (const branch of neurites) {
+    ctx.beginPath();
+    branch.outline.forEach((p, i) => {
+      if (i === 0) ctx.moveTo(X(p[0]), Y(p[1]));
+      else ctx.lineTo(X(p[0]), Y(p[1]));
+    });
+    ctx.closePath();
+    ctx.fill();
   }
-
   ctx.beginPath();
-  ctx.moveTo(X(0), Y(19));
-
+  ctx.moveTo(X(somaCurves[0][0][0]), Y(somaCurves[0][0][1]));
   for (const curve of somaCurves) {
     ctx.bezierCurveTo(
       X(curve[1][0]), Y(curve[1][1]),
@@ -596,15 +711,24 @@ function neuron() {
       X(curve[3][0]), Y(curve[3][1])
     );
   }
-
   ctx.closePath();
-  ctx.fillStyle = '#edf3f2';
   ctx.fill();
-  ctx.strokeStyle = '#8ca8ad';
-  ctx.lineWidth = 1.4;
-  ctx.stroke();
+  ctx.restore();
+}
 
-  circle(X(0), Y(-1), 5 * S, '#d8e5e4');
+function insideNeurite(x, y, clearance = .7 / S) {
+  for (const branch of neurites) {
+    const line = branch.centerline;
+    for (let i = 0; i < line.length - 1; i++) {
+      const a = line[i], b = line[i + 1];
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const denominator = dx * dx + dy * dy;
+      const u = denominator ? Math.max(0, Math.min(1, ((x - a.x) * dx + (y - a.y) * dy) / denominator)) : 0;
+      const radius = a.r + (b.r - a.r) * u;
+      if (Math.hypot(x - a.x - dx * u, y - a.y - dy * u) <= radius + clearance) return true;
+    }
+  }
+  return false;
 }
 
 /*
@@ -701,7 +825,7 @@ function amplifier(left, color) {
 }
 
 function intracellularElectrode() {
-  // Tip is in somatic cytoplasm, slightly above and left of the nucleus.
+  // The tip lies inside the tapered soma; the nucleus is not drawn.
   const tip = [X(-7), Y(4)];
   const base = [X(-50), Y(65)];
 
@@ -804,6 +928,51 @@ function extracellularElectrode() {
   );
 
   amplifier(false, C.extra);
+}
+
+/* Optional anatomy labels. Compact diagrams use numbered callouts and a key. */
+
+function neuronComponents() {
+  if (!$('components').checked) return;
+
+  const compact = W < 600;
+  const labels = [
+    { number: '01', name: 'Apical dendrites', anchor: [-1, 110], badge: [-66, 109], x: 20, y: Y(120), align: 'left' },
+    { number: '02', name: 'Soma', anchor: [8, 0], badge: [80, 18], x: W - 20, y: Y(24), align: 'right' },
+    { number: '03', name: 'Basal dendrites', anchor: [-44, -25], badge: [-95, -47], x: 20, y: Y(-32), align: 'left' },
+    { number: '04', name: 'Axon', anchor: [1, -74], badge: [30, -83], x: X(65), y: Math.min(H - 15, Y(-84)), align: 'left' }
+  ];
+
+  ctx.save();
+  for (const item of labels) {
+    const ax = X(item.anchor[0]);
+    const ay = Y(item.anchor[1]);
+    ctx.font = '600 11px system-ui';
+    const caption = `${item.number}  ${item.name}`;
+    const width = ctx.measureText(caption).width + 16;
+    const labelX = compact ? X(item.badge[0]) : item.x;
+    const labelY = compact ? Y(item.badge[1]) : item.y;
+    const left = item.align === 'right' ? labelX - width : labelX;
+    const endX = compact ? labelX : (ax > left + width / 2 ? left + width : left);
+
+    ctx.setLineDash([3, 3]);
+    line([[ax, ay], [endX, labelY]], '#52645e', .9);
+    ctx.setLineDash([]);
+    circle(ax, ay, 2, '#52645e');
+
+    if (compact) {
+      circle(labelX, labelY, 11, 'rgba(255,253,248,.97)');
+      ctx.strokeStyle = '#82928b';
+      ctx.lineWidth = .8;
+      ctx.stroke();
+      text(item.number, labelX, labelY + 3.5, '#245e58', 10, 'center');
+    } else {
+      ctx.fillStyle = 'rgba(255,253,248,.95)';
+      ctx.fillRect(left, labelY - 11, width, 22);
+      text(caption, left + 8, labelY + 4, '#304b43', 11);
+    }
+  }
+  ctx.restore();
 }
 
 /* Optional schematic ion-flow overlay; enabled initially. */
@@ -1076,18 +1245,7 @@ function validPosition(x, y) {
 
   if (inside) return false;
 
-  for (let j = 0; j < branches.length; j++) {
-    const branch = branches[j];
-    const radius = (j === 0 ? 4.5 : 2.5) / S;
-
-    for (let k = 0; k < branch.length - 1; k++) {
-      if (
-        segmentDistance(x, y, branch[k], branch[k + 1]) < radius
-      ) {
-        return false;
-      }
-    }
-  }
+  if (insideNeurite(x, y)) return false;
 
   return true;
 }
@@ -1148,6 +1306,7 @@ function draw() {
   intracellularElectrode();
   extracellularElectrode();
   voltageScale();
+  neuronComponents();
 
   plot(
     'intra',
@@ -1218,6 +1377,8 @@ $('reset').addEventListener('click', () => {
   $('speed').value = '1';
   $('contours').checked = true;
   $('ions').checked = true;
+  $('components').checked = false;
+  updateComponents();
   updateExtracellularTrace();
   updatePlayButton();
   dirty = true;
@@ -1237,6 +1398,15 @@ $('scrub').addEventListener('input', event => {
   updatePlayButton();
   dirty = true;
 });
+
+function updateComponents() {
+  const visible = $('components').checked;
+  $('component-key').hidden = !visible;
+  field.setAttribute('aria-describedby', visible ? 'field-help component-key' : 'field-help');
+  dirty = true;
+}
+
+$('components').addEventListener('change', updateComponents);
 
 for (const id of ['ions', 'contours']) {
   $(id).addEventListener('change', () => {
