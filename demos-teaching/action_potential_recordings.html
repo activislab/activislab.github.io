@@ -1,0 +1,1347 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Explore intracellular and extracellular action potentials in an interactive teaching demo created by Patrick Jendritza, with a layout adapted for ActivisLab.">
+  <meta name="author" content="Patrick Jendritza (original simulation); ActivisLab (layout adaptation)">
+  <meta name="theme-color" content="#10191b">
+  <title>Intracellular vs extracellular action potentials · ActivisLab</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172124;
+      --muted: #687578;
+      --paper: #f0ede5;
+      --panel: #fffdf8;
+      --line: #d7d2c7;
+      --accent: #e55737;
+      --accent2: #b94029;
+      --teal: #247d79;
+      --night: #10191b;
+      --intra: #a47a2f;
+      --extra: #148c85;
+      --shadow: 0 22px 60px #2b271e1d;
+    }
+    * { box-sizing: border-box; }
+    html { min-width: 320px; scroll-behavior: smooth; }
+    body { margin: 0; background: radial-gradient(circle at 8% 0, #fff 0, transparent 28rem), var(--paper); color: var(--ink); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    button, input, select { font: inherit; accent-color: var(--accent); }
+    button, select, label, summary { cursor: pointer; }
+    a { color: inherit; text-underline-offset: 3px; }
+    button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible, a:focus-visible, canvas:focus-visible { outline: 3px solid #53aaa3; outline-offset: 3px; }
+    .shell { width: min(1540px, 100%); margin: auto; padding: 28px clamp(12px, 3vw, 46px) 0; }
+    .hero { display: flex; justify-content: space-between; align-items: end; gap: 28px; padding: 4px 2px 20px; }
+    .lab-brand { display: inline-flex; align-items: center; gap: 12px; margin: 0 0 18px; text-decoration: none; }
+    .lab-brand svg { display: block; width: 42px; height: 32px; }
+    .lab-brand-copy { display: grid; line-height: 1.05; }
+    .lab-brand-copy strong { font-size: 16px; font-weight: 700; letter-spacing: .14em; }
+    .lab-brand-copy small { margin-top: 3px; color: var(--muted); font-size: 10px; letter-spacing: .015em; }
+    .eyebrow { margin: 0 0 9px; color: var(--accent2); font-size: .68rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(2.55rem, 5.5vw, 4.7rem); font-weight: 560; letter-spacing: -.06em; line-height: .98; }
+    .lede { max-width: 750px; margin: 16px 0 0; color: var(--muted); font-size: clamp(.88rem, 1.3vw, 1.05rem); line-height: 1.55; }
+    .hero-link { flex: none; margin-bottom: 5px; color: var(--accent2); font-size: .75rem; font-weight: 750; }
+    .source-line { display: flex; align-items: center; flex-wrap: wrap; gap: 5px 8px; margin-bottom: 12px; padding: 10px 13px; border: 1px solid #247d793b; border-radius: 8px; background: #edf5f0c9; color: #50615f; font-size: .76rem; line-height: 1.5; }
+    .dot { width: 7px; height: 7px; flex: 0 0 auto; margin-right: 2px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 3px #247d7922; }
+    .source-line a { color: #23625f; font-weight: 800; }
+    .source-note { margin-left: auto; color: var(--teal); font-size: .69rem; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 350px); align-items: stretch; overflow: hidden; border: 1px solid var(--line); border-radius: 19px; background: var(--panel); box-shadow: var(--shadow); }
+    .viewer { display: flex; flex-direction: column; min-width: 0; background: var(--night); color: #fff; }
+    .viewer-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; min-height: 56px; padding: 10px 16px; border-bottom: 1px solid #ffffff19; background: #162123; }
+    .viewer-title { font-size: .75rem; font-weight: 700; }
+    .display-controls { display: flex; gap: 16px; }
+    .display-controls label { display: inline-flex; align-items: center; gap: 6px; color: #ffffffcc; font-size: .72rem; }
+    .display-controls input { width: 14px; height: 14px; margin: 0; }
+    .scene { position: relative; flex: 1; min-height: 490px; background: #fff; }
+    #field { display: block; width: 100%; height: 100%; position: absolute; inset: 0; touch-action: none; }
+    .scene-hint { margin: 0; padding: 11px 16px; border-top: 1px solid #ffffff19; color: #ffffffaa; font-size: .7rem; line-height: 1.5; }
+    .scene-hint b { color: #fff; }
+    .transport { padding: 14px 16px 16px; border-top: 1px solid #ffffff19; background: #121c1e; }
+    .transport-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 36px; border: 1px solid #ffffff30; border-radius: 999px; background: transparent; color: #ffffffdf; padding: 7px 14px; font-size: .72rem; font-weight: 750; }
+    .btn.primary { min-width: 94px; border-color: var(--accent); background: var(--accent); color: #fff; }
+    .btn:hover { filter: brightness(.92); }
+    #play svg { width: 13px; height: 13px; flex: none; }
+    .speed-control { display: flex; align-items: center; gap: 8px; margin-left: auto; color: #ffffffaa; font-size: .68rem; }
+    #speed { min-height: 34px; border: 1px solid #ffffff30; border-radius: 7px; padding: 5px 8px; background: #162123; color: #fff; font-size: .72rem; }
+    .timeline { display: grid; grid-template-columns: 63px minmax(0, 1fr) 33px; align-items: center; gap: 8px; margin-top: 13px; color: #ffffffbc; font: .69rem ui-monospace, SFMono-Regular, monospace; font-variant-numeric: tabular-nums; }
+    #scrub { width: 100%; min-width: 0; height: 24px; margin: 0; cursor: ew-resize; }
+    .timeline-meta { display: flex; align-items: baseline; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin-top: 8px; font-size: .65rem; color: #ffffff95; }
+    .phase { color: #8dd6cf; font-weight: 750; }
+    .recordings { min-width: 0; border-left: 1px solid var(--line); }
+    .control-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 17px 18px; border-bottom: 1px solid var(--line); }
+    .control-head .eyebrow { margin-bottom: 5px; font-size: .61rem; }
+    .control-head h2 { margin: 0; font-size: 1.4rem; letter-spacing: -.04em; }
+    .link-btn { padding: 8px 0 8px 8px; border: 0; background: none; color: var(--accent2); font-size: .7rem; font-weight: 800; }
+    .recording + .recording { border-top: 1px solid var(--line); }
+    .panelhead { padding: 15px 18px 0; }
+    .panelhead h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 5px; font-size: .85rem; }
+    .key { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--intra); }
+    .key.extra { background: var(--extra); }
+    .panelhead p { margin: 0; color: var(--muted); font-size: .66rem; line-height: 1.5; }
+    .readout { margin: 10px 18px 0; font-size: 1.65rem; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+    .readout.intra { color: var(--intra); }
+    .readout.extra { color: var(--extra); }
+    .readout small { color: var(--muted); font-size: .75rem; letter-spacing: 0; }
+    .plot { display: block; width: 100%; height: 170px; }
+    .plotnote { margin: 8px 18px 16px; color: var(--muted); font-size: .65rem; line-height: 1.6; }
+    #position { color: var(--teal); font-variant-numeric: tabular-nums; }
+    .below { display: grid; grid-template-columns: minmax(230px, .65fr) minmax(0, 1.45fr); gap: clamp(24px, 6vw, 90px); padding: clamp(48px, 6vw, 80px) 2px; border-bottom: 1px solid var(--line); }
+    .below h2 { margin: 0; font-size: clamp(1.8rem, 3.5vw, 2.8rem); letter-spacing: -.045em; line-height: 1.08; }
+    .intro { margin: 14px 0 0; color: var(--muted); font-size: .82rem; line-height: 1.65; }
+    .notes { border-top: 1px solid #b9b3a8; }
+    .note { padding: 15px 0; border-bottom: 1px solid var(--line); }
+    .note h3 { margin: 0 0 6px; font-size: .82rem; }
+    .note p, .assumptions p { margin: 0; color: #536064; font-size: .76rem; line-height: 1.65; }
+    .assumptions { padding-top: 16px; }
+    .assumptions summary { color: var(--accent2); font-size: .76rem; font-weight: 750; }
+    .assumptions p { margin-top: 12px; }
+    .assumptions a { color: var(--accent2); }
+    .footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px 26px; padding: 24px 2px 32px; color: var(--muted); font-size: .68rem; line-height: 1.6; }
+    .footer p { margin: 0; }
+    .footer a { color: var(--accent2); }
+    kbd { padding: 2px 5px; border: 1px solid #bbb5a9; border-radius: 4px; background: #fffdf8; color: var(--ink); font: .62rem ui-monospace, monospace; }
+    @media (max-width: 1000px) {
+      .hero { align-items: start; flex-direction: column; gap: 16px; }
+      .layout { grid-template-columns: minmax(0, 1fr) 300px; }
+      .source-note { margin-left: 17px; }
+    }
+    @media (max-width: 800px) {
+      .layout { grid-template-columns: 1fr; }
+      .scene { flex: none; height: 490px; min-height: 0; }
+      .recordings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-left: 0; }
+      .control-head { grid-column: 1 / -1; }
+      .recording + .recording { border-top: 0; border-left: 1px solid var(--line); }
+      .below { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 540px) {
+      .shell { padding: 16px 10px 0; }
+      .lab-brand { margin-bottom: 18px; }
+      h1 { font-size: clamp(2.2rem, 9.2vw, 3.2rem); }
+      .hero { padding-bottom: 17px; }
+      .eyebrow { font-size: .6rem; }
+      .source-line { align-items: start; font-size: .72rem; }
+      .source-line .dot { margin-top: 5px; }
+      .source-note { width: 100%; }
+      .layout { border-radius: 12px; }
+      .viewer-bar { padding: 12px; }
+      .display-controls { gap: 12px; }
+      .scene { height: 420px; }
+      .transport { padding: 12px; }
+      .speed-control { width: 100%; justify-content: space-between; margin: 4px 0 0; }
+      .scene-hint { padding-inline: 12px; }
+      .recordings { grid-template-columns: 1fr; }
+      .recording + .recording { border-left: 0; border-top: 1px solid var(--line); }
+      .plot { height: 190px; }
+      .footer { flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  </style>
+</head>
+<body>
+<main class="shell">
+  <header class="hero">
+    <div>
+      <a class="lab-brand" href="https://activislab.com/" aria-label="ActivisLab — active vision laboratory">
+        <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="116" height="88" viewBox="0 0 116 88">
+  <g fill="#121820" fill-rule="nonzero">
+    <path d="M45.43 23.508 31.328 47.934 17.227 72.355h56.402L59.527 47.934 45.43 23.508Zm0 3.98 12.375 21.438 12.379 21.441H20.676l12.375-21.441L45.43 27.488Z"/>
+    <path d="M45.43 35.719 31.328 60.141h28.199L52.477 47.93 45.43 35.719Zm0 3.98 5.324 9.227 5.328 9.226H34.773L45.43 39.699Z"/>
+    <path d="M45.43 29.613 34.852 47.93 24.277 66.25h42.301L56.004 47.93 45.43 29.613Zm0 3.981 17.703 30.664h-35.41l8.851-15.332 8.856-15.332Z"/>
+    <path d="m45.43 41.824-3.528 6.11-3.523 6.101H52.48l-3.527-6.101-3.523-6.11Zm0 3.981 3.601 6.242h-7.207l1.801-3.121 1.805-3.121Z"/>
+    <path d="M99.465 23.508H43.063L57.164 47.93l14.102 24.425L85.363 47.93l14.102-24.422Zm-3.445 1.988L83.64 46.938 71.266 68.375 58.887 46.938 46.512 25.496H96.02Z"/>
+    <path d="M85.363 35.719H57.164l7.051 12.211 7.051 12.215 7.047-12.215 7.05-12.211Zm-3.445 1.992-5.328 9.227-5.324 9.226-5.328-9.226-5.325-9.227h21.305Z"/>
+    <path d="M92.414 29.613H50.113l10.575 18.321L71.266 66.25 81.84 47.934l10.574-18.321Zm-3.445 1.992L71.266 62.27l-8.852-15.332-8.855-15.333h35.41Z"/>
+    <path d="M78.316 41.824H64.215l3.523 6.106 3.528 6.105 3.523-6.105 3.527-6.106Zm-3.445 1.992-1.805 3.122-1.8 3.121-1.801-3.121-1.805-3.122h7.211Z"/>
+    <path d="M71.289 84.566H3.125L24.277 47.93 45.43 11.297 66.578 47.93l12.944 22.419-.024-.014-1.14 1.975-13.503-23.384L45.43 15.277 26 48.926 6.574 82.574h65.864l-1.149 1.992Z"/>
+    <path d="M45.369 11.297h68.197L92.414 47.93 71.266 84.566 50.113 47.93 37.21 25.578l1.147-1.99 13.479 23.35 19.43 33.648 19.425-33.648 19.43-33.653H44.3l1.128-1.954-.059-.034Z"/>
+    <path d="M41.893 17.402h64.623L88.891 47.934 71.266 78.46 53.64 47.934 38.955 22.495l1.149-1.991 15.259 26.434L71.266 74.48l15.902-27.542 15.902-27.547H40.746l1.147-1.989Z"/>
+    <path d="M74.816 78.46h-64.64L27.805 47.93 45.43 17.402 63.055 47.93l14.692 25.451-1.147 1.988L45.43 21.383 13.625 76.469h62.341l-1.15 1.992Z"/>
+  </g>
+</svg>
+
+        <span class="lab-brand-copy"><strong>activislab</strong><small>active vision laboratory</small></span>
+      </a>
+      <p class="eyebrow">Electrophysiology · Interactive teaching demo</p>
+      <h1>Intracellular vs<br>extracellular</h1>
+      <p class="lede">Follow an action potential from inside the neuron to the surrounding field. Move the extracellular electrode to compare what each recording measures.</p>
+    </div>
+    <a class="hero-link" href="https://activislab.com/demos-teaching/active_vision_simulator.html">Active vision simulator ↗</a>
+  </header>
+
+  <div class="source-line">
+    <i class="dot" aria-hidden="true"></i>
+    <span>Original demo created by <a href="https://patrickjendritza.com" target="_blank" rel="noopener noreferrer">Patrick Jendritza</a>.</span>
+    <span class="source-note">Layout adapted for ActivisLab · Illustrative single-neuron model</span>
+  </div>
+
+  <section class="layout" aria-label="Intracellular and extracellular action potential simulator">
+    <div class="viewer">
+      <div class="viewer-bar">
+        <span class="viewer-title">Neuron &amp; surrounding field</span>
+        <div class="display-controls" role="group" aria-label="Field display">
+          <label><input id="contours" type="checkbox" checked>Contours</label>
+          <label><input id="ions" type="checkbox" checked>Ion flow</label>
+        </div>
+      </div>
+      <div class="scene">
+        <canvas id="field" role="img" tabindex="0" aria-label="Neuron with intracellular electrode and a draggable extracellular electrode. Drag the extracellular electrode tip or use the arrow keys." aria-describedby="field-help"></canvas>
+      </div>
+      <p class="scene-hint" id="field-help"><b>Drag the extracellular electrode tip</b> to explore the field. Focus the diagram and use the arrow keys for fine adjustments.</p>
+      <div class="transport">
+        <div class="transport-actions">
+          <button class="btn primary" id="play" type="button" aria-label="Pause" title="Pause">Pause</button>
+          <button class="btn" id="replay" type="button">Replay</button>
+          <label class="speed-control" for="speed"><span>Playback speed</span><select id="speed" aria-label="Playback speed"><option value="0.5">½× speed</option><option value="1" selected>1× speed</option><option value="2">2× speed</option></select></label>
+        </div>
+        <div class="timeline">
+          <span id="time">0.00 ms</span>
+          <input id="scrub" aria-label="Time in milliseconds" type="range" min="0" max="5" step="0.005" value="0">
+          <span>5 ms</span>
+        </div>
+        <div class="timeline-meta"><span id="phase" class="phase">Rest</span><span>5 ms cycle · slowed down for teaching</span></div>
+      </div>
+    </div>
+
+    <aside class="recordings" aria-labelledby="recordings-heading">
+      <div class="control-head">
+        <div><p class="eyebrow">Two views of one spike</p><h2 id="recordings-heading">Compare recordings</h2></div>
+        <button class="link-btn" id="reset" type="button">Reset</button>
+      </div>
+      <section class="recording" aria-labelledby="intra-heading">
+        <div class="panelhead"><h3 id="intra-heading"><i class="key" aria-hidden="true"></i>Intracellular</h3><p>Somatic membrane potential · Vₘ</p></div>
+        <div class="readout intra"><span id="vm">−70.0</span> <small>mV</small></div>
+        <canvas id="intra" class="plot" role="img" aria-label="Somatic membrane potential versus time" aria-describedby="intra-note"></canvas>
+        <p class="plotnote" id="intra-note">Glass microelectrode inside the soma.<br>Vₘ = Vᵢ − Vₑ at the membrane.</p>
+      </section>
+      <section class="recording" aria-labelledby="extra-heading">
+        <div class="panelhead"><h3 id="extra-heading"><i class="key extra" aria-hidden="true"></i>Extracellular</h3><p>Local potential relative to a distant reference</p></div>
+        <div class="readout extra"><span id="ve">0.0</span> <small>µV</small></div>
+        <canvas id="extra" class="plot" role="img" aria-label="Extracellular potential versus time at the selected electrode position" aria-describedby="extra-note"></canvas>
+        <p class="plotnote" id="extra-note"><span id="position"></span><br>Position changes the amplitude and waveform.<br>Fixed vertical scale for comparison.</p>
+      </section>
+    </aside>
+  </section>
+
+  <section class="below" aria-labelledby="interpretation-heading">
+    <div><p class="eyebrow">Reading the signals</p><h2 id="interpretation-heading">One neuron.<br>Two perspectives.</h2><p class="intro">Pause the action potential, move the electrode, and compare the traces. The two recordings use different voltage scales: millivolts inside the cell and microvolts outside.</p></div>
+    <div class="notes">
+      <div class="note"><h3>01 · Follow the membrane voltage</h3><p>The intracellular trace shows the prescribed somatic action potential. Moving the extracellular electrode leaves this trace unchanged.</p></div>
+      <div class="note"><h3>02 · Explore the extracellular field</h3><p>The extracellular trace depends on the electrode’s location relative to current sources and sinks. Try positions near the soma, along the dendrites, and farther away; compare both the waveform and its amplitude.</p></div>
+      <div class="note"><h3>03 · Inspect a moment in time</h3><p>Drag the timeline to pause at any point in the 5 ms cycle. Blue and red indicate negative and positive extracellular potential. Contours connect equal potentials; the optional ion arrows illustrate somatic Na⁺ entry and K⁺ exit.</p></div>
+      <details class="assumptions">
+        <summary>Illustrative model · assumptions &amp; interpretation</summary>
+        <p>
+      Prescribed action-potential waveform and six balanced transmembrane
+      current compartments (ΣI = 0), not a conductance-based neuron.
+      Extracellular potential is calculated by superposition:
+      φₑ = Σ Iⱼ / (4πσrⱼ), with σ = 0.3 S/m.
+      With current in nA and distance in µm, multiplication by 1000 gives µV.
+      Dendritic currents are distributed uniformly along short segments
+      using numerical line-source integration. A finite source-radius cutoff
+      avoids singularities.
+      The conductor is homogeneous, isotropic and infinite in three dimensions;
+      the display shows a two-dimensional slice, with reference at infinity.
+      Positive transmembrane current is outward (source); negative current
+      is inward (sink). Current locations and passive return currents are
+      schematic.
+      Membrane voltage and currents are prescribed independently and are not
+      solved self-consistently. A remote-reference intracellular measurement
+      approximates Vₘ when the local extracellular contribution is small.
+      Amplifier ground symbols denote the recording reference.
+      Ion arrows illustrate somatic Na⁺ entry and K⁺ exit; they are not
+      simulated individual ion trajectories or the complete membrane current.
+      The extracellular trace represents a single-cell spike-related
+      potential, not a population LFP.
+      <a
+        href="https://lfpykit.readthedocs.io/en/latest/"
+        target="_blank"
+        rel="noopener">Volume-conductor model reference: LFPykit</a>.
+    </p>
+      </details>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>Original simulation by <a href="https://patrickjendritza.com" target="_blank" rel="noopener noreferrer">Patrick Jendritza</a>. Layout adapted for ActivisLab.</p>
+    <p>Keyboard: <kbd>Space</kbd> play/pause · <kbd>←</kbd> <kbd>↑</kbd> <kbd>↓</kbd> <kbd>→</kbd> move the focused electrode</p>
+  </footer>
+</main>
+<script>
+'use strict';
+
+// Original simulation: Patrick Jendritza — https://patrickjendritza.com
+// Layout and playback/accessibility integration adapted for ActivisLab.
+
+const $ = id => document.getElementById(id);
+const field = $('field');
+const ctx = field.getContext('2d');
+
+const C = {
+  ink: '#304952',
+  muted: '#71868d',
+  intra: '#a47a2f',
+  extra: '#148c85',
+  blue: '#347cc2',
+  red: '#cb6258'
+};
+
+let t = 0;
+let playing = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let last = null;
+let dirty = true;
+let dragging = false;
+let probe = { x: 36, y: -5 };
+
+let W = 0;
+let H = 0;
+let S = 1;
+let ox = 0;
+let oy = 0;
+let kernels = [];
+
+const X = x => ox + x * S;
+const Y = y => oy - y * S;
+
+const gaussian = (time, center, width) =>
+  Math.exp(-(((time - center) / width) ** 2));
+
+const membraneVoltage = time =>
+  -70
+  + 105 * gaussian(time, 1.6, .3)
+  - 12 * gaussian(time, 2.6, .7);
+
+const compartments = [
+  { x: 0,   y: 0,   r: 15 },
+  { x: 0,   y: 30,  r: 7 },
+  { x: 0,   y: 80,  r: 5 },
+  { x: 0,   y: 140, r: 3 },
+  { x: -40, y: -25, r: 4 },
+  { x: 40,  y: -25, r: 4 }
+];
+
+const segments = [
+  null,
+  [[0, 15], [0, 45]],
+  [[0, 45], [0, 115]],
+  [[0, 115], [0, 155]],
+  [[-20, -14], [-60, -34]],
+  [[20, -14], [60, -34]]
+];
+
+const sources = compartments.map((compartment, j) => {
+  if (!segments[j]) return [{ ...compartment, weight: 1 }];
+
+  const [a, b] = segments[j];
+
+  return Array.from({ length: 24 }, (_, k) => {
+    const u = (k + .5) / 24;
+
+    return {
+      x: a[0] + u * (b[0] - a[0]),
+      y: a[1] + u * (b[1] - a[1]),
+      r: compartment.r,
+      weight: 1 / 24
+    };
+  });
+});
+
+function currents(time) {
+  const sodium = -8.8 * gaussian(time, 1.5, .15);
+  const potassium = 3.2 * gaussian(time, 2.1, .4);
+  const proximal = -2 * gaussian(time, 1.8, .2);
+  const returns = -(sodium + potassium + proximal);
+
+  return [
+    sodium + potassium,
+    proximal + .2 * returns,
+    .4 * returns,
+    .2 * returns,
+    .1 * returns,
+    .1 * returns
+  ];
+}
+
+function kernel(x, y, j) {
+  let value = 0;
+
+  for (const source of sources[j]) {
+    const distance = Math.max(
+      source.r,
+      Math.hypot(x - source.x, y - source.y)
+    );
+
+    value += source.weight / distance;
+  }
+
+  return value * 1000 / (4 * Math.PI * .3);
+}
+
+function potential(x, y, current) {
+  let value = 0;
+
+  for (let j = 0; j < current.length; j++) {
+    value += current[j] * kernel(x, y, j);
+  }
+
+  return value;
+}
+
+function line(points, color, width = 1.4) {
+  ctx.beginPath();
+
+  points.forEach((point, index) => {
+    if (index) ctx.lineTo(...point);
+    else ctx.moveTo(...point);
+  });
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.stroke();
+}
+
+function text(
+  label, x, y, color = C.muted, size = 11, align = 'left'
+) {
+  ctx.font = `${size}px system-ui`;
+  ctx.fillStyle = color;
+  ctx.textAlign = align;
+  ctx.fillText(label, x, y);
+}
+
+function circle(x, y, radius, fill) {
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.fillStyle = fill;
+  ctx.fill();
+}
+
+/* Field map and interpolated isopotential contours. */
+
+const GW = 180;
+const GH = 210;
+
+const heat = document.createElement('canvas');
+heat.width = GW;
+heat.height = GH;
+
+const heatContext = heat.getContext('2d');
+const pixels = heatContext.createImageData(GW, GH);
+const grid = new Float32Array(GW * GH);
+
+function fieldColor(value) {
+  const magnitude = Math.min(Math.abs(value), 100);
+  const fraction = .39 * Math.tanh(magnitude / 48);
+  const color = value < 0 ? [52, 124, 194] : [203, 98, 88];
+
+  return color.map(component =>
+    Math.round(255 + (component - 255) * fraction)
+  );
+}
+
+function fieldMap(current) {
+  for (let i = 0; i < grid.length; i++) {
+    let value = 0;
+
+    for (let j = 0; j < current.length; j++) {
+      value += kernels[j][i] * current[j];
+    }
+
+    grid[i] = value;
+
+    const color = fieldColor(value);
+
+    pixels.data[i * 4] = color[0];
+    pixels.data[i * 4 + 1] = color[1];
+    pixels.data[i * 4 + 2] = color[2];
+    pixels.data[i * 4 + 3] = 255;
+  }
+
+  heatContext.putImageData(pixels, 0, 0);
+  ctx.imageSmoothingEnabled = true;
+  ctx.drawImage(heat, 0, 0, W, H);
+
+  if (!$('contours').checked) return;
+
+  const levels = [-100, -50, -20, -10, -5, -2, 2, 5, 10, 20, 50, 100];
+
+  for (const level of levels) {
+    ctx.beginPath();
+
+    for (let y = 0; y < GH - 1; y++) {
+      for (let x = 0; x < GW - 1; x++) {
+        const values = [
+          grid[y * GW + x],
+          grid[y * GW + x + 1],
+          grid[(y + 1) * GW + x + 1],
+          grid[(y + 1) * GW + x]
+        ];
+
+        const corners = [
+          [x, y],
+          [x + 1, y],
+          [x + 1, y + 1],
+          [x, y + 1]
+        ];
+
+        const crossings = [];
+
+        for (let edge = 0; edge < 4; edge++) {
+          const next = (edge + 1) % 4;
+
+          if ((values[edge] < level) === (values[next] < level)) {
+            continue;
+          }
+
+          const u =
+            (level - values[edge]) /
+            (values[next] - values[edge]);
+
+          crossings.push([
+            (
+              corners[edge][0] +
+              u * (corners[next][0] - corners[edge][0])
+            ) * W / (GW - 1),
+
+            (
+              corners[edge][1] +
+              u * (corners[next][1] - corners[edge][1])
+            ) * H / (GH - 1)
+          ]);
+        }
+
+        if (crossings.length === 2) {
+          ctx.moveTo(...crossings[0]);
+          ctx.lineTo(...crossings[1]);
+        } else if (crossings.length === 4) {
+          const center =
+            (values[0] + values[1] + values[2] + values[3]) / 4;
+
+          const pairs =
+            ((center < level) === (values[0] < level))
+              ? [[0, 1], [2, 3]]
+              : [[0, 3], [1, 2]];
+
+          for (const [a, b] of pairs) {
+            ctx.moveTo(...crossings[a]);
+            ctx.lineTo(...crossings[b]);
+          }
+        }
+      }
+    }
+
+    ctx.strokeStyle = level < 0
+      ? 'rgba(52,124,194,.36)'
+      : 'rgba(203,98,88,.36)';
+
+    ctx.lineWidth = .85;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.stroke();
+  }
+}
+
+/* Neuron geometry. */
+
+const branches = [
+  [[0, 12], [0, 45], [0, 95], [0, 146]],
+  [[0, 146], [-9, 163], [-24, 178]],
+  [[0, 146], [10, 165], [25, 179]],
+  [[0, 95], [-17, 116], [-29, 131]],
+  [[0, 80], [16, 99], [29, 109]],
+  [[-8, -6], [-27, -18], [-40, -25], [-61, -35]],
+  [[8, -6], [27, -18], [40, -25], [61, -35]],
+  [[0, -12], [0, -44], [4, -76]]
+];
+
+const somaCurves = [
+  [[0, 19], [8, 10], [19, -5], [14, -12]],
+  [[14, -12], [7, -19], [-10, -18], [-15, -10]],
+  [[-15, -10], [-19, -3], [-8, 10], [0, 19]]
+];
+
+const somaOutline = somaCurves.flatMap(curve =>
+  Array.from({ length: 40 }, (_, k) => {
+    const u = k / 40;
+    const v = 1 - u;
+
+    return [0, 1].map(d =>
+      v * v * v * curve[0][d] +
+      3 * v * v * u * curve[1][d] +
+      3 * v * u * u * curve[2][d] +
+      u * u * u * curve[3][d]
+    );
+  })
+);
+
+function neuron() {
+  for (let j = 0; j < branches.length; j++) {
+    const points = branches[j].map(point => [
+      X(point[0]), Y(point[1])
+    ]);
+
+    line(points, '#8ea9ae', j === 0 ? 9 : 5);
+    line(points, '#e1ebeb', j === 0 ? 6.5 : 3);
+  }
+
+  ctx.beginPath();
+  ctx.moveTo(X(0), Y(19));
+
+  for (const curve of somaCurves) {
+    ctx.bezierCurveTo(
+      X(curve[1][0]), Y(curve[1][1]),
+      X(curve[2][0]), Y(curve[2][1]),
+      X(curve[3][0]), Y(curve[3][1])
+    );
+  }
+
+  ctx.closePath();
+  ctx.fillStyle = '#edf3f2';
+  ctx.fill();
+  ctx.strokeStyle = '#8ca8ad';
+  ctx.lineWidth = 1.4;
+  ctx.stroke();
+
+  circle(X(0), Y(-1), 5 * S, '#d8e5e4');
+}
+
+/*
+  Both amplifier symbols and electrode cables use these exact terminals.
+  The electrode connects to the non-inverting (+) input.
+*/
+
+function amplifierGeometry(left) {
+  const x = left ? 42 : W - 42;
+  const y = Math.min(Y(-60), H - 65);
+  const direction = left ? -1 : 1;
+  const baseX = x - direction * 12;
+
+  return {
+    x,
+    y,
+    direction,
+    baseX,
+    tipX: x + direction * 20,
+    inputX: x - direction * 35,
+    inputY: y - 8,
+    referenceX: x - direction * 27,
+    referenceY: y + 8
+  };
+}
+
+function amplifier(left, color) {
+  const a = amplifierGeometry(left);
+
+  ctx.beginPath();
+  ctx.moveTo(a.baseX, a.y - 19);
+  ctx.lineTo(a.tipX, a.y);
+  ctx.lineTo(a.baseX, a.y + 19);
+  ctx.closePath();
+
+  ctx.fillStyle = 'white';
+  ctx.fill();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.6;
+  ctx.stroke();
+
+  line([
+    [a.inputX, a.inputY],
+    [a.baseX, a.inputY]
+  ], color, 1.5);
+
+  line([
+    [a.tipX, a.y],
+    [left ? 0 : W, a.y]
+  ], color, 1.5);
+
+  text(
+    '+',
+    a.baseX + a.direction * 6,
+    a.y - 4,
+    C.ink,
+    11,
+    'center'
+  );
+
+  text(
+    '−',
+    a.baseX + a.direction * 6,
+    a.y + 12,
+    C.ink,
+    11,
+    'center'
+  );
+
+  const groundY = a.y + 29;
+
+  line([
+    [a.baseX, a.referenceY],
+    [a.referenceX, a.referenceY],
+    [a.referenceX, groundY]
+  ], '#82979e', 1.1);
+
+  line([
+    [a.referenceX - 8, groundY],
+    [a.referenceX + 8, groundY]
+  ], '#82979e', 1.1);
+
+  line([
+    [a.referenceX - 5, groundY + 4],
+    [a.referenceX + 5, groundY + 4]
+  ], '#82979e', 1.1);
+
+  line([
+    [a.referenceX - 2, groundY + 8],
+    [a.referenceX + 2, groundY + 8]
+  ], '#82979e', 1.1);
+
+  text('amplifier', a.x, a.y + 49, C.muted, 10, 'center');
+}
+
+function intracellularElectrode() {
+  // Tip is in somatic cytoplasm, slightly above and left of the nucleus.
+  const tip = [X(-7), Y(4)];
+  const base = [X(-50), Y(65)];
+
+  const dx = base[0] - tip[0];
+  const dy = base[1] - tip[1];
+  const length = Math.hypot(dx, dy);
+  const nx = -dy / length;
+  const ny = dx / length;
+
+  const a = amplifierGeometry(true);
+
+  line([
+    base,
+    [a.inputX, base[1]],
+    [a.inputX, a.inputY]
+  ], C.intra, 1.5);
+
+  ctx.beginPath();
+  ctx.moveTo(tip[0] + nx, tip[1] + ny);
+  ctx.lineTo(base[0] + nx * 8, base[1] + ny * 8);
+  ctx.lineTo(base[0] - nx * 8, base[1] - ny * 8);
+  ctx.lineTo(tip[0] - nx, tip[1] - ny);
+  ctx.closePath();
+
+  ctx.fillStyle = 'rgba(235,242,246,.88)';
+  ctx.fill();
+  ctx.strokeStyle = '#8ca9b6';
+  ctx.lineWidth = 1.2;
+  ctx.stroke();
+
+  line([
+    base,
+    [
+      base[0] - dx / length * 24,
+      base[1] - dy / length * 24
+    ]
+  ], '#b69c64', 1.8);
+
+  text(
+    'Intracellular electrode',
+    base[0],
+    base[1] - 22,
+    C.intra,
+    11,
+    'center'
+  );
+
+  amplifier(true, C.intra);
+}
+
+function extracellularElectrode() {
+  const px = X(probe.x);
+  const py = Y(probe.y);
+
+  const bx = Math.min(W - 85, px + 46);
+  const by = Math.max(100, py - 90);
+
+  const dx = bx - px;
+  const dy = by - py;
+  const length = Math.hypot(dx, dy);
+  const nx = -dy / length;
+  const ny = dx / length;
+
+  const a = amplifierGeometry(false);
+
+  line([
+    [bx, by],
+    [a.inputX, by],
+    [a.inputX, a.inputY]
+  ], C.extra, 1.5);
+
+  ctx.beginPath();
+  ctx.moveTo(px, py);
+  ctx.lineTo(bx + nx * 5, by + ny * 5);
+  ctx.lineTo(bx - nx * 5, by - ny * 5);
+  ctx.closePath();
+
+  const gradient = ctx.createLinearGradient(
+    bx - nx * 5, by - ny * 5,
+    bx + nx * 5, by + ny * 5
+  );
+
+  gradient.addColorStop(0, '#72858e');
+  gradient.addColorStop(.5, '#f1f5f6');
+  gradient.addColorStop(1, '#9aadb4');
+
+  ctx.fillStyle = gradient;
+  ctx.fill();
+  ctx.strokeStyle = '#708b95';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  text(
+    'Extracellular electrode',
+    Math.max(85, Math.min(W - 85, bx)),
+    by - 22,
+    C.extra,
+    11,
+    'center'
+  );
+
+  amplifier(false, C.extra);
+}
+
+/* Optional schematic ion-flow overlay; enabled initially. */
+
+function ionFlow() {
+  if (!$('ions').checked) return;
+
+  const sodium = gaussian(t, 1.5, .15);
+  const potassium = gaussian(t, 2.1, .4);
+
+  const components = [
+    [sodium, true, C.blue, 'Na⁺', .2],
+    [potassium, false, C.red, 'K⁺', 2.5]
+  ];
+
+  for (const [strength, inward, color, label, start] of components) {
+    if (strength < .02) continue;
+
+    ctx.save();
+    ctx.globalAlpha = Math.min(.95, strength);
+
+    for (let j = 0; j < 4; j++) {
+      const angle = start + j * .45;
+      const cosine = Math.cos(angle);
+      const sine = Math.sin(angle);
+
+      const radius1 = inward ? 27 : 11;
+      const radius2 = inward ? 11 : 27;
+
+      const x1 = X(cosine * radius1);
+      const y1 = Y(sine * radius1);
+      const x2 = X(cosine * radius2);
+      const y2 = Y(sine * radius2);
+
+      line([[x1, y1], [x2, y2]], color, 1.6);
+
+      const direction = Math.atan2(y2 - y1, x2 - x1);
+
+      line([
+        [
+          x2 - 5 * Math.cos(direction - .5),
+          y2 - 5 * Math.sin(direction - .5)
+        ],
+        [x2, y2],
+        [
+          x2 - 5 * Math.cos(direction + .5),
+          y2 - 5 * Math.sin(direction + .5)
+        ]
+      ], color, 1.6);
+
+      const fraction = (t * 4 + j * .24) % 1;
+
+      circle(
+        x1 + (x2 - x1) * fraction,
+        y1 + (y2 - y1) * fraction,
+        2.7,
+        color
+      );
+    }
+
+    text(
+      label,
+      X(Math.cos(start + .65) * 36),
+      Y(Math.sin(start + .65) * 36),
+      color,
+      12,
+      'center'
+    );
+
+    ctx.restore();
+  }
+}
+
+function voltageScale() {
+  const x = 22;
+  const y = 37;
+  const width = Math.min(180, W * .45);
+
+  for (let k = 0; k < Math.ceil(width); k++) {
+    const value = -100 + 200 * k / (width - 1);
+    ctx.fillStyle = `rgb(${fieldColor(value).join(',')})`;
+    ctx.fillRect(x + k, y, 1, 9);
+  }
+
+  text('Extracellular potential (µV)', x, y - 9, C.muted, 10);
+
+  for (const value of [-100, -50, 0, 50, 100]) {
+    const xx = x + (value + 100) / 200 * width;
+
+    line([[xx, y + 10], [xx, y + 13]], C.muted, .7);
+
+    const label =
+      value === -100 ? '≤−100' :
+      value === 100 ? '≥100' :
+      String(value);
+
+    text(label, xx, y + 25, C.muted, 9, 'center');
+  }
+
+  const scaleLength = 50 * S;
+  const scaleRight = W - 22;
+  const scaleLeft = scaleRight - scaleLength;
+
+  line([[scaleLeft, 70], [scaleRight, 70]], C.muted, 1.5);
+
+  text(
+    '50 µm',
+    (scaleLeft + scaleRight) / 2,
+    63,
+    C.muted,
+    10,
+    'center'
+  );
+}
+
+/* Trace calculation: refresh the extracellular waveform when the tip moves. */
+
+const traceTimes = Float64Array.from(
+  { length: 501 },
+  (_, index) => index / 100
+);
+
+const intracellularTrace = Float64Array.from(
+  traceTimes,
+  membraneVoltage
+);
+
+let extracellularTrace = new Float64Array(traceTimes.length);
+
+function updateExtracellularTrace() {
+  extracellularTrace = Float64Array.from(
+    traceTimes,
+    time => potential(probe.x, probe.y, currents(time))
+  );
+}
+
+function plot(id, values, currentValue, range, ticks, color) {
+  const canvas = $(id);
+  const g = canvas.getContext('2d');
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
+
+  const left = 43;
+  const right = width - 14;
+  const top = 19;
+  const bottom = height - 34;
+
+  const x = time => left + time / 5 * (right - left);
+
+  const y = value =>
+    bottom -
+    (value - range[0]) / (range[1] - range[0]) *
+    (bottom - top);
+
+  g.clearRect(0, 0, width, height);
+  g.font = '10px system-ui';
+  g.textAlign = 'right';
+
+  for (const value of ticks) {
+    g.strokeStyle = '#e7eded';
+    g.lineWidth = 1;
+    g.beginPath();
+    g.moveTo(left, y(value));
+    g.lineTo(right, y(value));
+    g.stroke();
+
+    g.fillStyle = C.muted;
+    g.fillText(value, left - 7, y(value) + 3);
+  }
+
+  g.textAlign = 'center';
+  g.fillStyle = C.muted;
+
+  for (let value = 0; value <= 5; value++) {
+    g.fillText(value, x(value), bottom + 17);
+  }
+
+  g.fillText('time (ms)', (left + right) / 2, height - 3);
+
+  g.save();
+  g.beginPath();
+  g.rect(left, top, right - left, bottom - top);
+  g.clip();
+
+  // Full waveform is always present as a faint background trace.
+  g.strokeStyle = color;
+  g.lineWidth = 1.8;
+  g.lineJoin = 'round';
+  g.lineCap = 'round';
+  g.globalAlpha = .14;
+  g.beginPath();
+
+  for (let i = 0; i < values.length; i++) {
+    if (i) g.lineTo(x(traceTimes[i]), y(values[i]));
+    else g.moveTo(x(traceTimes[i]), y(values[i]));
+  }
+
+  g.stroke();
+
+  // Strong trace shows the elapsed part of the current action potential.
+  g.globalAlpha = 1;
+  g.beginPath();
+  g.moveTo(x(0), y(values[0]));
+
+  for (let i = 1; i < values.length && traceTimes[i] <= t; i++) {
+    g.lineTo(x(traceTimes[i]), y(values[i]));
+  }
+
+  g.lineTo(x(t), y(currentValue));
+  g.stroke();
+
+  g.strokeStyle = '#a2b4ba';
+  g.lineWidth = 1;
+  g.beginPath();
+  g.moveTo(x(t), top);
+  g.lineTo(x(t), bottom);
+  g.stroke();
+
+  g.fillStyle = color;
+  g.beginPath();
+  g.arc(x(t), y(currentValue), 3, 0, Math.PI * 2);
+  g.fill();
+
+  g.restore();
+}
+
+/* Cell-outline collision checks allow the tip close to the membrane. */
+
+function segmentDistance(x, y, a, b) {
+  const dx = b[0] - a[0];
+  const dy = b[1] - a[1];
+
+  const fraction = Math.max(
+    0,
+    Math.min(
+      1,
+      ((x - a[0]) * dx + (y - a[1]) * dy) /
+      (dx * dx + dy * dy)
+    )
+  );
+
+  return Math.hypot(
+    x - a[0] - fraction * dx,
+    y - a[1] - fraction * dy
+  );
+}
+
+function validPosition(x, y) {
+  let inside = false;
+
+  for (
+    let i = 0, j = somaOutline.length - 1;
+    i < somaOutline.length;
+    j = i++
+  ) {
+    const a = somaOutline[i];
+    const b = somaOutline[j];
+
+    if (
+      (a[1] > y) !== (b[1] > y) &&
+      x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0]
+    ) {
+      inside = !inside;
+    }
+
+    if (segmentDistance(x, y, a, b) < .7 / S) {
+      return false;
+    }
+  }
+
+  if (inside) return false;
+
+  for (let j = 0; j < branches.length; j++) {
+    const branch = branches[j];
+    const radius = (j === 0 ? 4.5 : 2.5) / S;
+
+    for (let k = 0; k < branch.length - 1; k++) {
+      if (
+        segmentDistance(x, y, branch[k], branch[k + 1]) < radius
+      ) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+function moveProbe(x, y) {
+  x = Math.max(-105, Math.min(100, x));
+  y = Math.max(-65, Math.min(165, y));
+
+  if (!validPosition(x, y)) return;
+
+  probe = { x, y };
+  updateExtracellularTrace();
+  dirty = true;
+}
+
+/* Responsive, high-resolution canvas rendering. */
+
+function resize() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  for (const canvas of [field, $('intra'), $('extra')]) {
+    const bounds = canvas.getBoundingClientRect();
+
+    canvas.width = Math.max(1, Math.round(bounds.width * dpr));
+    canvas.height = Math.max(1, Math.round(bounds.height * dpr));
+
+    canvas.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  W = field.clientWidth;
+  H = field.clientHeight;
+
+  S = Math.min((W - 48) / 280, (H - 100) / 280);
+  ox = W / 2;
+  oy = H * .68;
+
+  kernels = compartments.map((_, j) =>
+    Float32Array.from({ length: GW * GH }, (_, i) => {
+      const x = (i % GW / (GW - 1) * W - ox) / S;
+      const y = (oy - Math.floor(i / GW) / (GH - 1) * H) / S;
+      return kernel(x, y, j);
+    })
+  );
+
+  dirty = true;
+}
+
+function draw() {
+  const current = currents(t);
+  const vm = membraneVoltage(t);
+  const ve = potential(probe.x, probe.y, current);
+
+  ctx.clearRect(0, 0, W, H);
+
+  fieldMap(current);
+  neuron();
+  ionFlow();
+  intracellularElectrode();
+  extracellularElectrode();
+  voltageScale();
+
+  plot(
+    'intra',
+    intracellularTrace,
+    vm,
+    [-100, 50],
+    [-100, -70, 0, 50],
+    C.intra
+  );
+
+  plot(
+    'extra',
+    extracellularTrace,
+    ve,
+    [-180, 100],
+    [-150, -100, -50, 0, 50, 100],
+    C.extra
+  );
+
+  $('vm').textContent = vm.toFixed(1);
+  $('ve').textContent = ve.toFixed(1);
+  $('time').textContent = `${t.toFixed(2)} ms`;
+  $('scrub').value = t;
+
+  $('position').textContent =
+    `Tip: x ${probe.x.toFixed(0)}, y ${probe.y.toFixed(0)} µm`;
+
+  $('phase').textContent =
+    t < 1.1 ? 'Rest' :
+    t < 1.65 ? 'Depolarization' :
+    t < 2.3 ? 'Repolarization' :
+    t < 4 ? 'Afterhyperpolarization' :
+    'Rest';
+}
+
+/* Playback controls. */
+
+function updatePlayButton() {
+  const label = playing ? 'Pause' : 'Play';
+
+  $('play').setAttribute('aria-label', label);
+  $('play').title = label;
+
+  $('play').innerHTML = playing
+    ? '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3" height="12" rx=".6" fill="currentColor"/><rect x="10" y="2" width="3" height="12" rx=".6" fill="currentColor"/></svg>'
+    : '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2 L14 8 L4 14 Z" fill="currentColor"/></svg>';
+
+  $('play').insertAdjacentText('beforeend', label);
+}
+
+$('play').addEventListener('click', () => {
+  playing = !playing;
+  updatePlayButton();
+});
+
+$('replay').addEventListener('click', () => {
+  t = 0;
+  playing = true;
+  last = null;
+  dirty = true;
+  updatePlayButton();
+});
+
+$('reset').addEventListener('click', () => {
+  probe = { x: 36, y: -5 };
+  t = 0;
+  playing = false;
+  $('speed').value = '1';
+  $('contours').checked = true;
+  $('ions').checked = true;
+  updateExtracellularTrace();
+  updatePlayButton();
+  dirty = true;
+});
+
+document.addEventListener('keydown', event => {
+  if (event.code !== 'Space' || event.repeat || event.altKey || event.ctrlKey || event.metaKey) return;
+  if (event.target.closest('button, input, select, textarea, summary, a, [contenteditable]')) return;
+  event.preventDefault();
+  playing = !playing;
+  updatePlayButton();
+});
+
+$('scrub').addEventListener('input', event => {
+  t = Number(event.target.value);
+  playing = false;
+  updatePlayButton();
+  dirty = true;
+});
+
+for (const id of ['ions', 'contours']) {
+  $(id).addEventListener('change', () => {
+    dirty = true;
+  });
+}
+
+/* Drag the extracellular tip; keyboard arrows provide fine movement. */
+
+field.addEventListener('pointerdown', event => {
+  const bounds = field.getBoundingClientRect();
+
+  const distance = Math.hypot(
+    event.clientX - bounds.left - X(probe.x),
+    event.clientY - bounds.top - Y(probe.y)
+  );
+
+  if (distance > 30) return;
+
+  dragging = true;
+  field.setPointerCapture(event.pointerId);
+  field.focus();
+  event.preventDefault();
+});
+
+field.addEventListener('pointermove', event => {
+  const bounds = field.getBoundingClientRect();
+  const localX = event.clientX - bounds.left;
+  const localY = event.clientY - bounds.top;
+
+  if (dragging) {
+    moveProbe(
+      (localX - ox) / S,
+      (oy - localY) / S
+    );
+  }
+
+  const nearTip = Math.hypot(
+    localX - X(probe.x),
+    localY - Y(probe.y)
+  ) < 25;
+
+  field.style.cursor =
+    dragging ? 'grabbing' : nearTip ? 'grab' : 'default';
+});
+
+field.addEventListener('pointerup', () => {
+  dragging = false;
+});
+
+field.addEventListener('pointercancel', () => {
+  dragging = false;
+});
+
+field.addEventListener('lostpointercapture', () => {
+  dragging = false;
+});
+
+field.addEventListener('keydown', event => {
+  const delta = {
+    ArrowLeft: [-2, 0],
+    ArrowRight: [2, 0],
+    ArrowUp: [0, 2],
+    ArrowDown: [0, -2]
+  }[event.key];
+
+  if (!delta) return;
+
+  event.preventDefault();
+  moveProbe(probe.x + delta[0], probe.y + delta[1]);
+});
+
+updateExtracellularTrace();
+updatePlayButton();
+resize();
+
+const observer = new ResizeObserver(resize);
+
+for (const canvas of [field, $('intra'), $('extra')]) {
+  observer.observe(canvas);
+}
+
+window.addEventListener('resize', resize);
+
+function frame(now) {
+  const elapsed = last === null
+    ? 0
+    : Math.min(now - last, 50);
+
+  last = now;
+
+  if (playing) {
+    t = (t + elapsed / 1000 * .8 * Number($('speed').value)) % 5;
+    dirty = true;
+  }
+
+  if (dirty) {
+    draw();
+    dirty = false;
+  }
+
+  requestAnimationFrame(frame);
+}
+
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
